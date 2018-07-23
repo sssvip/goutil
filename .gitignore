@@ -1,0 +1,7 @@
+*.iml
+*.exe
+*/.idea/*
+*temp.go
+log.txt
+/.idea/
+/vendor/

@@ -1,11 +1,11 @@
 package goutil
 
 import (
-	"goutil/timeutil/stopwatch"
-	"goutil/strutil"
-	"goutil/logutil"
-	"goutil/dbutil"
-	"goutil/dbutil/sqlutil"
+	"github.com/sssvip/goutil/timeutil/stopwatch"
+	"github.com/sssvip/goutil/strutil"
+	"github.com/sssvip/goutil/logutil"
+	"github.com/sssvip/goutil/dbutil"
+	"github.com/sssvip/goutil/dbutil/sqlutil"
 )
 
 func Example() {

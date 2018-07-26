@@ -1,10 +1,10 @@
 package sqlutil
 
 import (
-	"goutil/strutil"
+	"github.com/sssvip/goutil/strutil"
 	"strings"
 	"errors"
-	"goutil/logutil"
+	"github.com/sssvip/goutil/logutil"
 )
 
 type SQLGen struct {

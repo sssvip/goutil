@@ -5,9 +5,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"testing"
 	"os"
-	"goutil/dbutil/sqlutil"
+	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/stretchr/testify/assert"
-	"goutil/strutil"
+	"github.com/sssvip/goutil/strutil"
 )
 
 const dbFileName = "temp.db"

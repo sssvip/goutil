@@ -2,7 +2,7 @@ package dbutil
 
 import (
 	"database/sql"
-	"goutil/dbutil/sqlutil"
+	"github.com/sssvip/goutil/dbutil/sqlutil"
 )
 
 /*

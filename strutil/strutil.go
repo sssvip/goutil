@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"github.com/google/uuid"
-	"goutil/logutil"
+	"github.com/sssvip/goutil/logutil"
 )
 
 //NewUUID 返回UUID

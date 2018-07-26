@@ -1,7 +1,7 @@
 package sqlutil
 
 import (
-	"goutil/strutil"
+	"github.com/sssvip/goutil/strutil"
 	"strings"
 )
 

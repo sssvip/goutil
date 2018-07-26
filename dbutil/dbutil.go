@@ -7,9 +7,9 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	"goutil/dbutil/sqlutil"
-	"goutil/logutil"
-	"goutil/strutil"
+	"github.com/sssvip/goutil/dbutil/sqlutil"
+	"github.com/sssvip/goutil/logutil"
+	"github.com/sssvip/goutil/strutil"
 )
 
 //ErrorCode 默认的错误值，错误的count数等等

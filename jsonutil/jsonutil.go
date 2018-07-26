@@ -2,7 +2,7 @@ package jsonutil
 
 import (
 	"github.com/json-iterator/go"
-	"goutil/logutil"
+	"github.com/sssvip/goutil/logutil"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary

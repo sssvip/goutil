@@ -1,0 +1,5 @@
+package goutil
+
+func Example() {
+
+}

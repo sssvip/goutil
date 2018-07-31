@@ -31,10 +31,10 @@ func SetNoticeUrl(noticeURL string) {
 
 //SendDavid 自用方法
 func SendDavid(content, url string) {
-	sendNotice("o44U9wt6O9P5j9M0L47RaGpxfe2o", content, url)
+	SendNotice("o44U9wt6O9P5j9M0L47RaGpxfe2o", content, url)
 }
 
-func sendNotice(openId, content, dstUrl string) {
+func SendNotice(openId, content, dstUrl string) {
 	if noticeRootURL == "" {
 		logutil.Error.Println("please set noticeURL")
 		return

@@ -66,6 +66,21 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:745f7fbe16b59b54666721e1cc3df28eb980d4ae8e7865b6c7c47aedebd51a02"
+  name = "github.com/sssvip/goutil"
+  packages = [
+    "dbutil",
+    "dbutil/sqlutil",
+    "logutil",
+    "strutil",
+    "timeutil",
+    "timeutil/stopwatch",
+  ]
+  pruneopts = "UT"
+  revision = "bedd3e66c1f856f702be90cbb4c4fe56bb29b3c0"
+  version = "v0.3"
+
+[[projects]]
   digest = "1:18752d0b95816a1b777505a97f71c7467a8445b8ffb55631a7bf779f6ba4fa83"
   name = "github.com/stretchr/testify"
   packages = ["assert"]
@@ -81,6 +96,12 @@
     "github.com/google/uuid",
     "github.com/json-iterator/go",
     "github.com/mattn/go-sqlite3",
+    "github.com/sssvip/goutil/dbutil",
+    "github.com/sssvip/goutil/dbutil/sqlutil",
+    "github.com/sssvip/goutil/logutil",
+    "github.com/sssvip/goutil/strutil",
+    "github.com/sssvip/goutil/timeutil",
+    "github.com/sssvip/goutil/timeutil/stopwatch",
     "github.com/stretchr/testify/assert",
   ]
   solver-name = "gps-cdcl"

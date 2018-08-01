@@ -18,7 +18,7 @@ const ErrorCount = -1
 
 //NewDBByArg 通过参数获取db对象
 func NewDBByArg(username, password, address, port, database string) *sql.DB {
-	url := strutil.Format("%s:%s@tcp(%s:%s)/%s", username, password, address, port, database)
+	url := strutil.Format("%s:%s@tcp(%s:%s)/%s?collation=utf8mb4_unicode_ci&charset=utf8mb4", username, password, address, port, database)
 	db, err := sql.Open("mysql", url)
 	if err != nil {
 		logutil.Error.Println(url, err)

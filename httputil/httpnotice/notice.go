@@ -55,6 +55,7 @@ func SendNotice(openId, content, dstUrl string) (success bool) {
 	} else {
 		logutil.Info.Println(body)
 	}
+	return
 }
 
 func keepAlive() {

@@ -34,7 +34,7 @@ func SendDavid(content, url string) {
 	SendNotice("o44U9wt6O9P5j9M0L47RaGpxfe2o", content, url)
 }
 
-func SendNotice(openId, content, dstUrl string) {
+func SendNotice(openId, content, dstUrl string) (success bool) {
 	if noticeRootURL == "" {
 		logutil.Error.Println("please set noticeURL")
 		return
@@ -51,6 +51,7 @@ func SendNotice(openId, content, dstUrl string) {
 	body, _, _ := httputils.Post(noticeRootURL, data.Encode(), nil)
 	if !strings.Contains(body, `"errmsg":"ok"`) {
 		logutil.Error.Println(body)
+		return true
 	} else {
 		logutil.Info.Println(body)
 	}

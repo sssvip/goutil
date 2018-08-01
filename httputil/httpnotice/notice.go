@@ -37,7 +37,7 @@ func SendDavid(content, url string) {
 func SendNotice(openId, content, dstUrl string) (success bool) {
 	if noticeRootURL == "" {
 		logutil.Error.Println("please set noticeURL")
-		return
+		return false
 	}
 	data := httpbuilder.NewBodyArgs().
 		Add("name", "golang notice").
@@ -51,11 +51,11 @@ func SendNotice(openId, content, dstUrl string) (success bool) {
 	body, _, _ := httputils.Post(noticeRootURL, data.Encode(), nil)
 	if !strings.Contains(body, `"errmsg":"ok"`) {
 		logutil.Error.Println(body)
-		return true
+		return false
 	} else {
 		logutil.Info.Println(body)
 	}
-	return
+	return true
 }
 
 func keepAlive() {

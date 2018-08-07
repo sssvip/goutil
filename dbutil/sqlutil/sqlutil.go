@@ -52,7 +52,7 @@ func (sqlGen *SQLGen) Or(columnName string, condition interface{}) *SQLGen {
 }
 
 func safeFormatValue(value interface{}) string {
-	switch  value.(type) {
+	switch value.(type) {
 	case int, int64:
 		return strutil.Format("%d", value)
 	case string:
@@ -132,6 +132,7 @@ func (sqlGen *SQLGen) UpdateColumn(columnName string, value interface{}) *SQLGen
 	sqlGen.updateColumnMap[columnName] = value
 	return sqlGen
 }
+
 func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 	var updateColumns []string
 	for _, key := range sqlGen.updateColumnKeys {
@@ -142,6 +143,20 @@ func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 	args = append(args, tArgs...)
 	sqlStr = strutil.Format("update %s set %s %s %s", sqlGen.tableName, strings.Join(updateColumns, ","), conditions, sqlGen.customCondition)
 	return
+}
+
+func (sqlGen *SQLGen) Update2Insert() *SQLGen {
+	for _, key := range sqlGen.updateColumnKeys {
+		sqlGen.InsertColumn(key, sqlGen.updateColumnMap[key])
+	}
+	return sqlGen
+}
+
+func (sqlGen *SQLGen) Insert2Update() *SQLGen {
+	for _, key := range sqlGen.insertColumnKeys {
+		sqlGen.UpdateColumn(key, sqlGen.insertColumnMap[key])
+	}
+	return sqlGen
 }
 
 /*

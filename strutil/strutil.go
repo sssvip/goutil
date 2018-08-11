@@ -41,6 +41,15 @@ func AtoIWithDefault(text string, defaultValue int) int {
 	return i
 }
 
+//AtoIWithDefault 转换字符串道int 失败返回默认值
+func AtoInt64WithDefault(text string, defaultValue int64) int64 {
+	i, e := strconv.ParseInt(text, 10, 64)
+	if e != nil {
+		return defaultValue
+	}
+	return i
+}
+
 //AtoFloat64WithDefault 转换字符串道float64 失败返回默认值
 func AtoFloat64WithDefault(text string, defaultValue float64) float64 {
 	f, e := strconv.ParseFloat(text, 64)

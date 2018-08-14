@@ -7,21 +7,24 @@ import (
 	"github.com/sssvip/goutil/logutil"
 )
 
+var ErrorCheckoutSQLCondition = errors.New("checkout conditions,let sql safe,you can sqlGen.ForceExecOnNoCondition() force exec current sql")
+
 type SQLGen struct {
 	tableName    string
 	queryColumns []string
 	//辅助有序(输出的sql更加稳定)
-	insertColumnKeys  []string
-	insertColumnMap   map[string]interface{}
-	updateColumnKeys  []string
-	updateColumnMap   map[string]interface{}
-	andConditionKeys  []string
-	andConditionMap   map[string]interface{}
-	orConditionKeys   []string
-	orConditionMap    map[string]interface{}
-	customCondition   string
-	orderByConditions []string
-	limit             int
+	insertColumnKeys       []string
+	insertColumnMap        map[string]interface{}
+	updateColumnKeys       []string
+	updateColumnMap        map[string]interface{}
+	andConditionKeys       []string
+	andConditionMap        map[string]interface{}
+	orConditionKeys        []string
+	orConditionMap         map[string]interface{}
+	customCondition        string
+	orderByConditions      []string
+	limit                  int
+	forceExecOnNoCondition bool
 }
 
 func NewSQLGen(tableName string) *SQLGen {
@@ -123,15 +126,14 @@ func (sqlGen *SQLGen) Count() (sqlStr string, args []interface{}, err error) {
 	return strutil.Format("select %s from %s %s %s", countCondition, sqlGen.tableName, conditions, sqlGen.customCondition), tArgs, nil
 }
 
+func (sqlGen *SQLGen) ForceExecOnNoCondition() *SQLGen {
+	sqlGen.forceExecOnNoCondition = true
+	return sqlGen
+}
+
 /*
 	修改部分
 */
-
-func (sqlGen *SQLGen) UpdateColumn(columnName string, value interface{}) *SQLGen {
-	sqlGen.updateColumnKeys = append(sqlGen.updateColumnKeys, columnName)
-	sqlGen.updateColumnMap[columnName] = value
-	return sqlGen
-}
 
 func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 	var updateColumns []string
@@ -140,9 +142,18 @@ func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 		args = append(args, sqlGen.updateColumnMap[key])
 	}
 	conditions, tArgs := sqlGen.genConditions()
+	if !sqlGen.forceExecOnNoCondition && conditions == "" {
+		return "", nil, ErrorCheckoutSQLCondition
+	}
 	args = append(args, tArgs...)
 	sqlStr = strutil.Format("update %s set %s %s %s", sqlGen.tableName, strings.Join(updateColumns, ","), conditions, sqlGen.customCondition)
 	return
+}
+
+func (sqlGen *SQLGen) UpdateColumn(columnName string, value interface{}) *SQLGen {
+	sqlGen.updateColumnKeys = append(sqlGen.updateColumnKeys, columnName)
+	sqlGen.updateColumnMap[columnName] = value
+	return sqlGen
 }
 
 func (sqlGen *SQLGen) Update2Insert() *SQLGen {
@@ -187,6 +198,9 @@ func (sqlGen *SQLGen) Insert() (sqlStr string, args []interface{}, err error) {
 
 func (sqlGen *SQLGen) Delete() (sqlStr string, args []interface{}, err error) {
 	conditions, tArgs := sqlGen.genConditions()
+	if !sqlGen.forceExecOnNoCondition && conditions == "" {
+		return "", nil, ErrorCheckoutSQLCondition
+	}
 	return strutil.Format("delete from %s %s", sqlGen.tableName, conditions), tArgs, nil
 }
 

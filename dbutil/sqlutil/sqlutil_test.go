@@ -20,3 +20,13 @@ func TestExample2(t *testing.T) {
 	result := exampleBase(true) != ""
 	assert.True(t, result)
 }
+
+func TestSQLGen_Update(t *testing.T) {
+	//没有设置条件的情况
+	sqlGen := NewSQLGen("t").UpdateColumn("name", "test")
+	_, _, e := sqlGen.Update()
+	assert.Equal(t, e, ErrorCheckoutSQLCondition)
+	//断言强制执行
+	_, _, e = sqlGen.ForceExecOnNoCondition().Update()
+	assert.Equal(t, nil, e)
+}

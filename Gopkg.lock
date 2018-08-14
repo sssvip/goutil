@@ -78,6 +78,14 @@
   version = "1.0.1"
 
 [[projects]]
+  branch = "master"
+  digest = "1:3a16300d913e1050d4a7ff296106a11b72da05c5dd3475f2ae1feb0830866461"
+  name = "github.com/olebedev/config"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ed90d2035b8114c30b9cb65e7d52e10a7148f8c6"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
@@ -111,6 +119,14 @@
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
 
+[[projects]]
+  digest = "1:342378ac4dcb378a5448dd723f0784ae519383532f5e70ade24132c4c8693202"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -120,6 +136,7 @@
     "github.com/google/uuid",
     "github.com/json-iterator/go",
     "github.com/mattn/go-sqlite3",
+    "github.com/olebedev/config",
     "github.com/sssvip/goutil/dbutil",
     "github.com/sssvip/goutil/dbutil/sqlutil",
     "github.com/sssvip/goutil/httputil",

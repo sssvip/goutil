@@ -7,7 +7,7 @@ import (
 
 var defaultConfig *config.Config
 //默认读取项目启动文件同路径下的config.yml,读取active项的值 采用相应环境变量
-func DefaultYmlConfig(findFileInParent bool, path ...string) *config.Config {
+func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config {
 	configPath := "config.yml"
 	if len(path) > 0 {
 		configPath = path[0]
@@ -16,8 +16,8 @@ func DefaultYmlConfig(findFileInParent bool, path ...string) *config.Config {
 		allConfig := ConfigPath(configPath)
 		if allConfig == nil {
 			logutil.Error.Println("can not find file config.yml in root path")
-			if findFileInParent {
-				return DefaultYmlConfig(false, "../"+configPath)
+			if findFileInParentLevel > 0 {
+				return DefaultYmlConfig(findFileInParentLevel-1, "../"+configPath)
 			}
 			return nil
 		}

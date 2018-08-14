@@ -1,4 +1,4 @@
-package conf
+package confutil
 
 import (
 	"github.com/olebedev/config"

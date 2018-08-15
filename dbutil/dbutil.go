@@ -31,8 +31,8 @@ func NewDBByArg(username, password, address, port, database string) *sql.DB {
 }
 
 //GetRowBySQLStr 通过sqlStr获取数据库行记录
-func GetRowBySQLStr(db *sql.DB, sqlStr string) (row []string, err error) {
-	return justOneRow(GetRowsBySQLStr(db, sqlStr))
+func GetRowBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (row []string, err error) {
+	return justOneRow(GetRowsBySQLStr(db, sqlStr, args...))
 }
 
 //QueryForObjectBySQLStr 通过sqlStr获取数据库行记录,直接写入传入的地址，不再copy数据

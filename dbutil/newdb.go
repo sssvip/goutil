@@ -55,6 +55,10 @@ func (db *DBWrapper) GetRowBySQLGen(sqlGen *sqlutil.SQLGen) ([]string, error) {
 	return GetRowBySQLGen(db.OriginDB, sqlGen)
 }
 
+func (db *DBWrapper) GetRowBySQLStr(sqlStr string, args ...interface{}) (row []string, err error) {
+	return GetRowBySQLStr(db.OriginDB, sqlStr, args...)
+}
+
 func (db *DBWrapper) GetRowsBySQLGenPrintSql(sqlGen *sqlutil.SQLGen) ([][]string, error) {
 	return GetRowsBySQLGenPrintSql(db.OriginDB, sqlGen)
 }

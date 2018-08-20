@@ -72,7 +72,32 @@ func SetProxyRootURL(proxyURL string) {
 	makeProxyRootURL = proxyURL
 }
 
-func MakeTrans() {
+func ProxyTransport(ip, port string) *http.Transport {
+	proxyAddr := func(_ *http.Request) (*url.URL, error) {
+		uristr := fmt.Sprintf("http://%s:%s", ip, port)
+		return url.Parse(uristr)
+	}
+	transport := &http.Transport{
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		/*Dial: func(netw, addr string) (net.Conn, error) {
+			deadline := time.Now().Add(30 * time.Second)
+			c, err := net.DialTimeout(netw, addr, 20*time.Second)
+			if err != nil {
+				return nil, err
+			}
+			c.SetDeadline(deadline)
+			return c, nil
+		},*/
+		Proxy: proxyAddr}
+	return transport
+}
+
+func ProduceProxyTrans() {
 	if makeProxyRootURL == "" {
 		logutil.Error.Println("please set makeProxyRootUrl before use proxy")
 		return
@@ -103,29 +128,7 @@ func MakeTrans() {
 	}
 	if proxy.RESULT != nil {
 		for _, data := range proxy.RESULT {
-			proxyAddr := func(_ *http.Request) (*url.URL, error) {
-				uristr := fmt.Sprintf("http://%s:%s", data.IP, data.Port)
-				return url.Parse(uristr)
-			}
-
-			transport := &http.Transport{
-				DialContext: (&net.Dialer{
-					Timeout:   30 * time.Second,
-					KeepAlive: 30 * time.Second,
-				}).DialContext,
-				TLSHandshakeTimeout:   10 * time.Second,
-				ExpectContinueTimeout: 1 * time.Second,
-				/*Dial: func(netw, addr string) (net.Conn, error) {
-					deadline := time.Now().Add(30 * time.Second)
-					c, err := net.DialTimeout(netw, addr, 20*time.Second)
-					if err != nil {
-						return nil, err
-					}
-					c.SetDeadline(deadline)
-					return c, nil
-				},*/
-				Proxy: proxyAddr}
-			//log.Println("produce new transport.........", data.IP, data.Port)
+			transport := ProxyTransport(data.IP, data.Port)
 			transChan <- &TransWithTime{transport, time.Now()}
 			/*err = transQueue.Put()
 			if err != nil {
@@ -142,7 +145,7 @@ func getTransFromQueue() *http.Transport {
 		//log.Println("transQueue empty.........")
 		time.Sleep(200 * time.Millisecond)
 		if len(transChan) == 0 {
-			go MakeTrans()
+			go ProduceProxyTrans()
 		}
 	}
 	twt := <-transChan

@@ -6,7 +6,7 @@ import (
 )
 
 var defaultConfig *config.Config
-//默认读取项目启动文件同路径下的config.yml,读取active项的值 采用相应环境变量
+//DefaultYmlConfig 默认读取项目启动文件同路径下的config.yml,读取active项的值 采用相应环境变量
 func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config {
 	configPath := "config.yml"
 	if len(path) > 0 {
@@ -15,9 +15,10 @@ func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config 
 	if defaultConfig == nil {
 		allConfig := ConfigPath(configPath)
 		if allConfig == nil {
-			logutil.Error.Println("can not find file config.yml in root path")
 			if findFileInParentLevel > 0 {
 				return DefaultYmlConfig(findFileInParentLevel-1, "../"+configPath)
+			} else {
+				logutil.Error.Println("can not find file config.yml in root path")
 			}
 			return nil
 		}
@@ -31,11 +32,13 @@ func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config 
 	return defaultConfig
 }
 
-//读取指定路径下的yaml配置文件
-func ConfigPath(confPath string) *config.Config {
+//ConfigPath 读取指定路径下的yaml配置文件
+func ConfigPath(confPath string, showLog ...bool) *config.Config {
 	cfg, err := config.ParseYamlFile(confPath)
 	if err != nil {
-		logutil.Error.Println(err, confPath)
+		if !(len(showLog) > 0 && showLog[0] == false) {
+			logutil.Error.Println(err, confPath)
+		}
 		return nil
 	}
 	return cfg

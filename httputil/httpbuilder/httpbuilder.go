@@ -1,6 +1,8 @@
 package httpbuilder
 
-import "net/url"
+import (
+	"net/url"
+)
 
 //便于生成请求体参数
 
@@ -46,7 +48,18 @@ func (httpHeader *HttpHeader) AddReferer(value string) *HttpHeader {
 	httpHeader.header["Referer"] = value
 	return httpHeader
 }
+func (httpHeader *HttpHeader) AddContentType(value string) *HttpHeader {
+	httpHeader.header["Content-Type"] = value
+	return httpHeader
+}
 
+func (httpHeader *HttpHeader) JSONContentType() string {
+	return "application/json"
+}
+
+func (httpHeader *HttpHeader) URLEncodedContentType() string {
+	return "application/x-www-form-urlencoded"
+}
 func (httpHeader *HttpHeader) Get() map[string]string {
 	return httpHeader.header
 }

@@ -215,6 +215,9 @@ func Post(url string, bodyArgs string, headers map[string]string) (string, int, 
 	return HttpBase("POST", url, bodyArgs, false, defaultRetryTimes, nil, headers)
 }
 
+const ContentType = "Content-Type"
+const UserAgent = "User-Agent"
+
 //body 可用NewBodyArgs生成
 //expectTexts:满足一个text则正常请求
 //返回respBodyStr,StatusCode,respHeader
@@ -231,14 +234,22 @@ func HttpBase(method string, url string, body string, useProxy bool, retryTime i
 		logutil.Error.Println(er)
 		return "Create Request Error", 500, nil
 	}
-	if len(body) > 0 {
-		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	}
-	request.Header.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36")
 	if headers != nil {
 		for k, v := range headers {
 			request.Header.Add(k, v)
 		}
+	}
+	if len(body) > 0 && request.Header.Get(ContentType) == "" {
+		if string(body[0]) == "{" {
+			request.Header.Add(ContentType, "application/json")
+		} else {
+			request.Header.Add(ContentType, "application/x-www-form-urlencoded")
+		}
+	}
+	//agent
+	if request.Header.Get(UserAgent) == "" {
+		//设置默认
+		request.Header.Add(UserAgent, "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36")
 	}
 	if useProxy {
 		clt := Require()

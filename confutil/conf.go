@@ -13,7 +13,7 @@ func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config 
 		configPath = path[0]
 	}
 	if defaultConfig == nil {
-		allConfig := ConfigPath(configPath)
+		allConfig := ConfigPath(configPath, false)
 		if allConfig == nil {
 			if findFileInParentLevel > 0 {
 				return DefaultYmlConfig(findFileInParentLevel-1, "../"+configPath)

@@ -202,6 +202,17 @@ func Get(url string) (string, int, http.Header) {
 	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil)
 }
 
+func GetLocation(url string) string {
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, _ := http.DefaultTransport.RoundTrip(req)
+	loc, e := resp.Location()
+	if e != nil {
+		logutil.Error.Println(e)
+		return ""
+	}
+	return loc.String()
+}
+
 func ProxyGet(url string) (string, int, http.Header) {
 	return HttpBase("GET", url, "", true, defaultRetryTimes, nil, nil)
 }

@@ -1,12 +1,16 @@
 package httputils
 
 import (
-	"testing"
+	"fmt"
+	"github.com/sssvip/goutil/jsonutil"
 	"github.com/stretchr/testify/assert"
 	"net/http"
-	"github.com/sssvip/goutil/jsonutil"
-	"fmt"
+	"testing"
 )
+
+func TestSimpleGet(t *testing.T) {
+	fmt.Println(SimpleGet("http://192.168.2.200/8wv0Q"))
+}
 
 func TestGet(t *testing.T) {
 	body, code, _ := Get("http://httpbin.org/ip")

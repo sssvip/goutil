@@ -199,31 +199,25 @@ type ReqHelper struct {
 }
 
 func Get(url string) (string, int, http.Header) {
-	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil)
+	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil, false)
 }
 
-func GetLocation(url string) string {
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := http.DefaultTransport.RoundTrip(req)
-	loc, e := resp.Location()
-	if e != nil {
-		logutil.Error.Println(e)
-		return ""
-	}
-	return loc.String()
+//不自动跳转
+func SimpleGet(url string) (body string, statusCode int, respHeader http.Header) {
+	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil, true)
 }
 
 func ProxyGet(url string) (string, int, http.Header) {
-	return HttpBase("GET", url, "", true, defaultRetryTimes, nil, nil)
+	return HttpBase("GET", url, "", true, defaultRetryTimes, nil, nil, false)
 }
 
 func GetWithHeader(url string, headers map[string]string) (string, int, http.Header) {
-	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, headers)
+	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, headers, false)
 }
 
 //仅url必要
 func Post(url string, bodyArgs string, headers map[string]string) (string, int, http.Header) {
-	return HttpBase("POST", url, bodyArgs, false, defaultRetryTimes, nil, headers)
+	return HttpBase("POST", url, bodyArgs, false, defaultRetryTimes, nil, headers, false)
 }
 
 const ContentType = "Content-Type"
@@ -232,7 +226,7 @@ const UserAgent = "User-Agent"
 //body 可用NewBodyArgs生成
 //expectTexts:满足一个text则正常请求
 //返回respBodyStr,StatusCode,respHeader
-func HttpBase(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string) (string, int, http.Header) {
+func HttpBase(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string, noAutoRedirect bool) (string, int, http.Header) {
 	reqHelper := ReqHelper{}
 	var request *http.Request
 	var er error
@@ -266,6 +260,8 @@ func HttpBase(method string, url string, body string, useProxy bool, retryTime i
 		clt := Require()
 		reqHelper.clt = clt
 		reqHelper.resp, reqHelper.err = reqHelper.clt.Do(request)
+	} else if noAutoRedirect {
+		reqHelper.resp, reqHelper.err = http.DefaultTransport.RoundTrip(request);
 	} else {
 		reqHelper.resp, reqHelper.err = http.DefaultClient.Do(request);
 	}
@@ -286,7 +282,7 @@ func HttpBase(method string, url string, body string, useProxy bool, retryTime i
 		}
 		if retryTime > 0 {
 			retryTime--
-			return HttpBase(method, url, body, useProxy, retryTime, expectTexts, headers)
+			return HttpBase(method, url, body, useProxy, retryTime, expectTexts, headers, noAutoRedirect)
 		} else {
 			if useProxy && reqHelper.err != nil && (strings.Contains(reqHelper.err.Error(), "timeout") || strings.Contains(reqHelper.err.Error(), "proxyconnect")) {
 				return ProxyError, HttpErrorCode, nil

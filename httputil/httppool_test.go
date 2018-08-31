@@ -9,7 +9,7 @@ import (
 )
 
 func TestSimpleGet(t *testing.T) {
-	fmt.Println(SimpleGet("http://192.168.2.200/8wv0Q"))
+	//fmt.Println(SimpleGet("http://192.168.2.200/8wv0Q"))
 }
 
 func TestGet(t *testing.T) {

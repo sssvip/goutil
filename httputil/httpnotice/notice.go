@@ -1,13 +1,13 @@
 package httpnotice
 
 import (
-	"strings"
-	"os"
-	"github.com/sssvip/goutil/logutil"
-	"github.com/sssvip/goutil/httputil/httpbuilder"
 	"github.com/sssvip/goutil/httputil"
-	"github.com/sssvip/goutil/timeutil"
+	"github.com/sssvip/goutil/httputil/httpbuilder"
+	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
+	"github.com/sssvip/goutil/timeutil"
+	"os"
+	"strings"
 	"sync"
 )
 

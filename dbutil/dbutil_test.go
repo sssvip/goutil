@@ -3,11 +3,11 @@ package dbutil
 import (
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
-	"testing"
-	"os"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
-	"github.com/stretchr/testify/assert"
 	"github.com/sssvip/goutil/strutil"
+	"github.com/stretchr/testify/assert"
+	"os"
+	"testing"
 )
 
 const dbFileName = "temp.db"
@@ -28,7 +28,7 @@ func createTestDB(t *testing.T) {
 	if e != nil {
 		t.Error("创建临时数据库失败", e)
 	}
-	db.Exec(createTableSql);
+	db.Exec(createTableSql)
 	tempTestDB = db
 }
 func removeTestDB(t *testing.T) {

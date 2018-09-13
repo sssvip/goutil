@@ -6,6 +6,7 @@ import (
 )
 
 var defaultConfig *config.Config
+
 //DefaultYmlConfig 默认读取项目启动文件同路径下的config.yml,读取active项的值 采用相应环境变量
 func DefaultYmlConfig(findFileInParentLevel int, path ...string) *config.Config {
 	configPath := "config.yml"

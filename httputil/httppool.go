@@ -1,18 +1,18 @@
 package httputils
 
 import (
-	"net/http"
-	"io/ioutil"
-	"net/url"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 	//"github.com/Workiva/go-datastructures/queue"
-	"sync/atomic"
-	"strings"
-	"net"
 	"github.com/sssvip/goutil/logutil"
+	"net"
+	"strings"
+	"sync/atomic"
 )
 
 const HttpErrorCode = 500
@@ -32,6 +32,7 @@ var totalClient int32 = 0
 //var UseCacheClient = true
 
 var defaultRetryTimes = 3
+
 //var defaultProxyRetryTimes = 15
 
 func PoolStatistic() string {
@@ -261,9 +262,9 @@ func HttpBase(method string, url string, body string, useProxy bool, retryTime i
 		reqHelper.clt = clt
 		reqHelper.resp, reqHelper.err = reqHelper.clt.Do(request)
 	} else if noAutoRedirect {
-		reqHelper.resp, reqHelper.err = http.DefaultTransport.RoundTrip(request);
+		reqHelper.resp, reqHelper.err = http.DefaultTransport.RoundTrip(request)
 	} else {
-		reqHelper.resp, reqHelper.err = http.DefaultClient.Do(request);
+		reqHelper.resp, reqHelper.err = http.DefaultClient.Do(request)
 	}
 	if reqHelper.resp != nil {
 		defer func() {

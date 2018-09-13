@@ -1,8 +1,8 @@
 package strutil
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestNewUUID(t *testing.T) {

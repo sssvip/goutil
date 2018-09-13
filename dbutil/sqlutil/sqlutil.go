@@ -1,10 +1,10 @@
 package sqlutil
 
 import (
-	"github.com/sssvip/goutil/strutil"
-	"strings"
 	"errors"
 	"github.com/sssvip/goutil/logutil"
+	"github.com/sssvip/goutil/strutil"
+	"strings"
 )
 
 var ErrorCheckoutSQLCondition = errors.New("checkout conditions,let sql safe,you can sqlGen.ForceExecOnNoCondition() force exec current sql")

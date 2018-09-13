@@ -1,10 +1,10 @@
 package stopwatch
 
 import (
-	"time"
 	"github.com/sssvip/goutil/logutil"
-	"github.com/sssvip/goutil/timeutil"
 	"github.com/sssvip/goutil/strutil"
+	"github.com/sssvip/goutil/timeutil"
+	"time"
 )
 
 func CalcTime(t *time.Time, explain ...interface{}) {

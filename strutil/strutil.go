@@ -2,13 +2,13 @@ package strutil
 
 import (
 	"crypto/md5"
-	"io"
-	"strings"
 	"encoding/hex"
 	"fmt"
-	"strconv"
 	"github.com/google/uuid"
 	"github.com/sssvip/goutil/logutil"
+	"io"
+	"strconv"
+	"strings"
 )
 
 //NewUUID 返回UUID

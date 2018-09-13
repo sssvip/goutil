@@ -2,7 +2,6 @@ package webserver
 
 import (
 	"github.com/gin-gonic/gin"
-
 )
 
 func NewWebServerWithPProf() *gin.Engine {

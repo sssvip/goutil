@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/timeutil/stopwatch"
-	"goutil/jsonutil"
-	"goutil/logutil"
+	"github.com/sssvip/goutil/jsonutil"
+	"github.com/sssvip/goutil/logutil"
 )
 
 /*

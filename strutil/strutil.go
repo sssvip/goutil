@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/sssvip/goutil/logutil"
 	"io"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -69,4 +70,17 @@ func SafeCutString(text string, size int) string {
 		return string(tempRune[:size])
 	}
 	return text
+}
+
+//GetStrByRegexp 安全返回正则结果(正则分组返回结果，groups 0-> 包含正则条件中的串， 1 正则括号中的干净值)
+func GetStrByRegexp(re *regexp.Regexp, text string, groups ...int) []string {
+	arrRst := make([]string, len(groups))
+	//正则实际结果
+	arr := re.FindStringSubmatch(text)
+	for index, data := range groups {
+		if data > -1 && data < len(arr) {
+			arrRst[index] = arr[data]
+		}
+	}
+	return arrRst
 }

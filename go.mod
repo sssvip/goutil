@@ -14,8 +14,8 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742 // indirect
 	github.com/olebedev/config v0.0.0-20180625110059-ed90d2035b81
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/sssvip/goutil v0.0.0-20180731094248-676b63c71425
 	github.com/stretchr/testify v1.2.2
 	github.com/ugorji/go v1.1.1 // indirect
 	gopkg.in/go-playground/validator.v8 v8.18.2 // indirect

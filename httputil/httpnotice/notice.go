@@ -1,6 +1,7 @@
 package httpnotice
 
 import (
+	"github.com/patrickmn/go-cache"
 	"github.com/sssvip/goutil/httputil"
 	"github.com/sssvip/goutil/httputil/httpbuilder"
 	"github.com/sssvip/goutil/logutil"
@@ -9,9 +10,13 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 var osName string
+
+//DavidOpenID .
+const DavidOpenID = "o44U9wt6O9P5j9M0L47RaGpxfe2o"
 
 //noticeRootURL 发送通知的地址,自我实现
 var noticeRootURL = ""
@@ -31,7 +36,24 @@ func SetNoticeUrl(noticeURL string) {
 
 //SendDavid 自用方法
 func SendDavid(content, url string) {
-	SendNotice("o44U9wt6O9P5j9M0L47RaGpxfe2o", content, url)
+	SendNotice(DavidOpenID, content, url)
+}
+
+var cc = cache.New(30*time.Minute, 30*time.Minute)
+
+//SendNoticeWithPeriod .
+func SendNoticeWithPeriod(openId, content, dstUrl string, period time.Duration) (success bool) {
+	key := strutil.Md5(openId + content + dstUrl)
+	v, exist := cc.Get(key)
+	if exist {
+		logutil.Console.Println(strutil.Format("repeat notice in period %s %s %s", openId, content, dstUrl))
+		return v.(bool)
+	}
+	result := SendNotice(openId, content, dstUrl)
+	if result {
+		cc.Set(key, result, period)
+	}
+	return result
 }
 
 func SendNotice(openId, content, dstUrl string) (success bool) {

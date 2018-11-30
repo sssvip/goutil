@@ -134,6 +134,15 @@ func DeleteTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 	return Exec(db, sqlStr, args...)
 }
 
+func DeleteTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	sqlStr, args, e := sqlGen.Delete()
+	if e != nil {
+		logutil.Error.Println(e, sqlStr, args)
+		return ErrorCount, e
+	}
+	return ExecTx(tx, sqlStr, args...)
+}
+
 func UpdateTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {
 	sqlStr, args, e := sqlGen.Update()
 	if e != nil {
@@ -141,6 +150,15 @@ func UpdateTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 		return ErrorCount, e
 	}
 	return Exec(db, sqlStr, args...)
+}
+
+func UpdateTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	sqlStr, args, e := sqlGen.Update()
+	if e != nil {
+		logutil.Error.Println(e)
+		return ErrorCount, e
+	}
+	return ExecTx(tx, sqlStr, args...)
 }
 
 func InsertTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -152,8 +170,27 @@ func InsertTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 	return Exec(db, sqlStr, args...)
 }
 
+func InsertTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	sqlStr, args, e := sqlGen.Insert()
+	if e != nil {
+		logutil.Error.Println(e)
+		return ErrorCount, e
+	}
+	return ExecTx(tx, sqlStr, args...)
+}
+
 func Exec(db *sql.DB, sql string, args ...interface{}) (result int64, err error) {
 	rst, e := db.Exec(sql, args...)
+	if e == nil {
+		return rst.RowsAffected()
+	} else {
+		logutil.Error.Println(e, sql, args)
+	}
+	return ErrorCode, e
+}
+
+func ExecTx(tx *sql.Tx, sql string, args ...interface{}) (result int64, err error) {
+	rst, e := tx.Exec(sql, args...)
 	if e == nil {
 		return rst.RowsAffected()
 	} else {

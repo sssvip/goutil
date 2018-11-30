@@ -94,12 +94,32 @@ func (db *DBWrapper) InsertTableBySQLGen(sqlGen *sqlutil.SQLGen) (result int64, 
 	return
 }
 
+func (db *DBWrapper) InsertTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = InsertTableBySQLGenTx(tx, sqlGen)
+	db.check(t, sqlGen)
+	return
+}
+
 func (db *DBWrapper) DeleteTableBySQLGen(sqlGen *sqlutil.SQLGen) (result int64, err error) {
 	var t *stopwatch.StopWatch
 	if db.openCheckSlowSQL {
 		t = stopwatch.NewStopWatch(slowSQLCheck)
 	}
 	result, err = DeleteTableBySQLGen(db.OriginDB, sqlGen)
+	db.check(t, sqlGen)
+	return
+}
+
+func (db *DBWrapper) DeleteTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = DeleteTableBySQLGenTx(tx, sqlGen)
 	db.check(t, sqlGen)
 	return
 }
@@ -114,6 +134,16 @@ func (db *DBWrapper) UpdateTableBySQLGen(sqlGen *sqlutil.SQLGen) (result int64, 
 	return
 }
 
+func (db *DBWrapper) UpdateTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = UpdateTableBySQLGenTx(tx, sqlGen)
+	db.check(t, sqlGen)
+	return
+}
+
 func (db *DBWrapper) Exec(sqlStr string, args ...interface{}) (result int64, err error) {
 	var t *stopwatch.StopWatch
 	if db.openCheckSlowSQL {
@@ -124,12 +154,32 @@ func (db *DBWrapper) Exec(sqlStr string, args ...interface{}) (result int64, err
 	return
 }
 
+func (db *DBWrapper) ExecTx(tx *sql.Tx, sqlStr string, args ...interface{}) (result int64, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = ExecTx(tx, sqlStr, args...)
+	db.check(t, sqlStr)
+	return
+}
+
 func (db *DBWrapper) GetRowBySQLGen(sqlGen *sqlutil.SQLGen) (result []string, err error) {
 	var t *stopwatch.StopWatch
 	if db.openCheckSlowSQL {
 		t = stopwatch.NewStopWatch(slowSQLCheck)
 	}
 	result, err = GetRowBySQLGen(db.OriginDB, sqlGen)
+	db.check(t, sqlGen)
+	return
+}
+
+func (db *DBWrapper) GetRowBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result []string, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = GetRowBySQLGenTx(tx, sqlGen)
 	db.check(t, sqlGen)
 	return
 }
@@ -160,6 +210,16 @@ func (db *DBWrapper) GetRowsBySQLGen(sqlGen *sqlutil.SQLGen) (result [][]string,
 		t = stopwatch.NewStopWatch(slowSQLCheck)
 	}
 	result, err = GetRowsBySQLGen(db.OriginDB, sqlGen)
+	db.check(t, sqlGen)
+	return
+}
+
+func (db *DBWrapper) GetRowsBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result [][]string, err error) {
+	var t *stopwatch.StopWatch
+	if db.openCheckSlowSQL {
+		t = stopwatch.NewStopWatch(slowSQLCheck)
+	}
+	result, err = GetRowsBySQLGenTx(tx, sqlGen)
 	db.check(t, sqlGen)
 	return
 }

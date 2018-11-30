@@ -169,7 +169,7 @@ func GetRowBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (row []string, err error
 }
 func GetRowBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (row []string, err error) {
 	sqlGen.Limit(1)
-	return justOneRow(GetRowsBySQLGen(tx, sqlGen))
+	return justOneRow(GetRowsBySQLGenTx(tx, sqlGen))
 }
 
 func DeleteTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {

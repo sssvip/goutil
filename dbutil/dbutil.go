@@ -95,6 +95,40 @@ func GetRowsBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]s
 	return rows, err
 }
 
+func GetRowsBySQLStrTx(tx *sql.Tx, sqlStr string, args ...interface{}) (rows [][]string, err error) {
+	rs, e := tx.Query(sqlStr, args...)
+	if e != nil {
+		logutil.Error.Println(e, sqlStr, args)
+		return nil, err
+	}
+	defer func() {
+		e := rs.Close()
+		if e != nil {
+			logutil.Error.Println(e)
+		}
+	}()
+	for rs.Next() {
+		cls, er := rs.Columns()
+		if er != nil {
+			logutil.Error.Println(er)
+			return rows, er
+		}
+		//遍历取列
+		buff := make([]interface{}, len(cls))
+		var columns = make([]string, len(cls))
+		for i, _ := range buff {
+			buff[i] = &columns[i]
+		}
+		e := rs.Scan(buff...)
+		if e != nil {
+			logutil.Error.Println(e)
+			return rows, e
+		}
+		rows = append(rows, columns)
+	}
+	return rows, err
+}
+
 func GetRowsBySQLGenPrintSql(db *sql.DB, sqlGen *sqlutil.SQLGen) (rows [][]string, err error) {
 	sqlStr, args, e := sqlGen.Query()
 	logutil.Console.Println(sqlStr)
@@ -113,6 +147,15 @@ func GetRowsBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (rows [][]string, err e
 	return GetRowsBySQLStr(db, sqlStr, args...)
 }
 
+func GetRowsBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (rows [][]string, err error) {
+	sqlStr, args, e := sqlGen.Query()
+	if e != nil {
+		logutil.Error.Println(e, sqlStr, args)
+		return nil, e
+	}
+	return GetRowsBySQLStrTx(tx, sqlStr, args...)
+}
+
 func justOneRow(columns [][]string, e error) (row []string, err error) {
 	if len(columns) > 0 {
 		return columns[0], e
@@ -123,6 +166,10 @@ func justOneRow(columns [][]string, e error) (row []string, err error) {
 func GetRowBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (row []string, err error) {
 	sqlGen.Limit(1)
 	return justOneRow(GetRowsBySQLGen(db, sqlGen))
+}
+func GetRowBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (row []string, err error) {
+	sqlGen.Limit(1)
+	return justOneRow(GetRowsBySQLGen(tx, sqlGen))
 }
 
 func DeleteTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {

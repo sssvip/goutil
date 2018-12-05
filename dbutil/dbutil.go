@@ -268,3 +268,20 @@ func CountBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int, err error) {
 func Count(db *sql.DB, tableName, condition string) (result int, err error) {
 	return CountBySQLGen(db, sqlutil.NewSQLGen(tableName).CustomConditionAppend(condition))
 }
+
+func HandTxError(tx *sql.Tx, err error) {
+	if err != nil {
+		e := tx.Rollback()
+		if e != nil {
+			logutil.Error.Println(e)
+		}
+		logutil.Error.Println(err)
+		return
+	}
+
+	e := tx.Commit()
+	if e != nil {
+		logutil.Error.Println(e)
+	}
+
+}

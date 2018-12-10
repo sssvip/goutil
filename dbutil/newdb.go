@@ -25,7 +25,7 @@ type SQLStatisticSummary struct {
 	StatisticEndTime   string
 
 	//SQL执行次数
-	TotalCmdCount int
+	TotalCmdCount int64
 
 	QueryCmdCount          int
 	QueryLongestAveTimeSQL string //执行最长平均时间SQL
@@ -119,7 +119,7 @@ func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
 	summary.StatisticStartTime = db.statisticStartTime
 	stats := db.Statistic()
 	for _, s := range stats {
-		summary.TotalCmdCount++
+		summary.TotalCmdCount += s.ExecCount
 		if strings.HasPrefix(s.SQLStr, "select") {
 			summary.QueryCmdCount++
 			if s.ExecCount > summary.QueryMaxTimesCount {

@@ -5,9 +5,12 @@ import (
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
+	"github.com/sssvip/goutil/timeutil"
 	"github.com/sssvip/goutil/timeutil/stopwatch"
+	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 /*
@@ -16,12 +19,49 @@ import (
 
 */
 
+type SQLStatisticSummary struct {
+	//统计起止时间
+	StatisticStartTime string
+	StatisticEndTime   string
+
+	//SQL执行次数
+	TotalCmdCount int
+
+	QueryCmdCount          int
+	QueryLongestAveTimeSQL string //执行最长平均时间SQL
+	QueryLongestAveTime    int64  //执行最长平均时间
+	QueryMaxTimesSQL       string //执行次数最多
+	QueryMaxTimesCount     int64
+
+	//Insert
+	InsertCmdCount          int
+	InsertLongestAveTimeSQL string
+	InsertLongestAveTime    int64
+	InsertMaxTimesSQL       string
+	InsertMaxTimesCount     int64
+
+	//Update
+	UpdateCmdCount          int
+	UpdateLongestAveTimeSQL string
+	UpdateLongestAveTime    int64
+	UpdateMaxTimesSQL       string
+	UpdateMaxTimesCount     int64
+
+	//Delete
+	DeleteCmdCount          int
+	DeleteLongestAveTimeSQL string
+	DeleteLongestAveTime    int64
+	DeleteMaxTimesSQL       string
+	DeleteMaxTimesCount     int64
+}
+
 type SQLStatistic struct {
 	SQLStr                  string
 	MaxExecTimeMilliSeconds int64
 	MinExecMilliSeconds     int64
-	ExecCount               int32
+	ExecCount               int64
 	ExecTotalTime           int64
+	ExecAveTime             int64
 }
 
 func (sqlStatistic *SQLStatistic) ExecOnce(sqlStr string, useMilliSeconds int64) {
@@ -32,16 +72,17 @@ func (sqlStatistic *SQLStatistic) ExecOnce(sqlStr string, useMilliSeconds int64)
 	if sqlStatistic.MinExecMilliSeconds > useMilliSeconds {
 		sqlStatistic.MinExecMilliSeconds = useMilliSeconds
 	}
-	atomic.AddInt32(&sqlStatistic.ExecCount, 1)
+	atomic.AddInt64(&sqlStatistic.ExecCount, 1)
 	atomic.AddInt64(&sqlStatistic.ExecTotalTime, useMilliSeconds)
 }
 
 type DBWrapper struct {
-	slowSQLSeconds   int
-	OriginDB         *sql.DB
-	openCheckSlowSQL bool
-	statisticSQL     bool
-	statistics       sync.Map
+	slowSQLSeconds     int
+	OriginDB           *sql.DB
+	openCheckSlowSQL   bool
+	statisticSQL       bool
+	statistics         sync.Map
+	statisticStartTime string
 }
 
 var slowSQLCheck = "slowSQLCheck"
@@ -56,17 +97,83 @@ func (db *DBWrapper) OpenCheckSlowSQL(open bool) {
 
 func (db *DBWrapper) StatisticSQL(open bool) {
 	db.statisticSQL = open
+	db.statisticStartTime = timeutil.FormatDateTimeString(time.Now())
 }
 
 func (db *DBWrapper) ClearStatistic() {
 	db.statistics = sync.Map{}
+	db.statisticStartTime = timeutil.FormatDateTimeString(time.Now())
 }
 
 func (db *DBWrapper) Statistic() (stats []SQLStatistic) {
 	db.statistics.Range(func(key, value interface{}) bool {
-		stats = append(stats, *value.(*SQLStatistic))
+		s := *value.(*SQLStatistic)
+		s.ExecAveTime = s.ExecTotalTime / s.ExecCount
+		stats = append(stats, s)
 		return true
 	})
+	return
+}
+func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
+	summary = SQLStatisticSummary{}
+	summary.StatisticStartTime = db.statisticStartTime
+	stats := db.Statistic()
+	for _, s := range stats {
+		summary.TotalCmdCount++
+		if strings.HasPrefix(s.SQLStr, "select") {
+			summary.QueryCmdCount++
+			if s.ExecCount > summary.QueryMaxTimesCount {
+				summary.QueryMaxTimesSQL = s.SQLStr
+				summary.QueryMaxTimesCount = s.ExecCount
+			}
+			if s.ExecAveTime > summary.QueryLongestAveTime {
+				summary.QueryLongestAveTimeSQL = s.SQLStr
+				summary.QueryLongestAveTime = s.ExecAveTime
+
+			}
+			continue
+		}
+		if strings.HasPrefix(s.SQLStr, "update") {
+			summary.UpdateCmdCount++
+			if s.ExecCount > summary.UpdateMaxTimesCount {
+				summary.UpdateMaxTimesSQL = s.SQLStr
+				summary.UpdateMaxTimesCount = s.ExecCount
+			}
+			if s.ExecAveTime > summary.UpdateLongestAveTime {
+				summary.UpdateLongestAveTimeSQL = s.SQLStr
+				summary.UpdateLongestAveTime = s.ExecAveTime
+
+			}
+			continue
+		}
+		if strings.HasPrefix(s.SQLStr, "insert") {
+			summary.InsertCmdCount++
+			if s.ExecCount > summary.InsertMaxTimesCount {
+				summary.InsertMaxTimesSQL = s.SQLStr
+				summary.InsertMaxTimesCount = s.ExecCount
+			}
+			if s.ExecAveTime > summary.InsertLongestAveTime {
+				summary.InsertLongestAveTimeSQL = s.SQLStr
+				summary.InsertLongestAveTime = s.ExecAveTime
+
+			}
+			continue
+		}
+		if strings.HasPrefix(s.SQLStr, "delete") {
+			summary.DeleteCmdCount++
+			if s.ExecCount > summary.DeleteMaxTimesCount {
+				summary.DeleteMaxTimesSQL = s.SQLStr
+				summary.DeleteMaxTimesCount = s.ExecCount
+			}
+			if s.ExecAveTime > summary.DeleteLongestAveTime {
+				summary.DeleteLongestAveTimeSQL = s.SQLStr
+				summary.DeleteLongestAveTime = s.ExecAveTime
+
+			}
+			continue
+		}
+	}
+	summary.StatisticEndTime = timeutil.FormatDateTimeString(time.Now())
 	return
 }
 

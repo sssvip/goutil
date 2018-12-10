@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
+	"github.com/sssvip/goutil/strutil"
 	"github.com/sssvip/goutil/timeutil/stopwatch"
-	"goutil/strutil"
 	"sync"
 	"sync/atomic"
 )

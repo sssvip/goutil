@@ -69,7 +69,7 @@ func TestCRUD(t *testing.T) {
 	//修改
 	var newUserameValue = "new_test"
 	var newdepartNameValue = "new_test_dep"
-	updateCount, e := UpdateTableBySQLGen(tempTestDB, sqlutil.NewSQLGen(tableName).UpdateColumn("username", newUserameValue).UpdateColumn("depart_name", newdepartNameValue))
+	updateCount, e := UpdateTableBySQLGen(tempTestDB, sqlutil.NewSQLGen(tableName).UpdateColumn("username", newUserameValue).UpdateColumn("depart_name", newdepartNameValue).ForceExecOnNoCondition())
 	assert.Nil(t, e)
 	assert.Equal(t, int64(2), updateCount)
 	//		查询修改后的结果

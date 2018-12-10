@@ -22,6 +22,7 @@ type SQLGen struct {
 	orConditionKeys        []string
 	orConditionMap         map[string]interface{}
 	customCondition        string
+	customConditionArgs    []interface{}
 	orderByConditions      []string
 	limit                  int
 	forceExecOnNoCondition bool
@@ -78,9 +79,19 @@ func safeFormatKWithPlaceHolder(columnName string) string {
 }
 
 // condition一旦设置,追加到除了order by,limit关键字外的所有条件最后（需要用到条件时才生效）
+// Deprecated: recommend use CustomConditionAndArgsAppend to use k,v sql .
 func (sqlGen *SQLGen) CustomConditionAppend(condition string) *SQLGen {
 	if condition != "" {
 		sqlGen.customCondition += strutil.Format(" %s", condition)
+	}
+	return sqlGen
+}
+
+// condition一旦设置,追加到除了order by,limit关键字外的所有条件最后（需要用到条件时才生效）
+func (sqlGen *SQLGen) CustomConditionAndArgsAppend(condition string, args ...interface{}) *SQLGen {
+	if condition != "" {
+		sqlGen.customCondition += strutil.Format(" %s", condition)
+		sqlGen.customConditionArgs = append(sqlGen.customConditionArgs, args...)
 	}
 	return sqlGen
 }
@@ -110,6 +121,9 @@ func (sqlGen *SQLGen) genConditions() (sqlStr string, args []interface{}) {
 	sql := strutil.Format("%s%s%s", sqlCondition, andCondition, orCondition)
 	if len(andCondition) < 1 && len(orConditions) < 1 && sqlGen.customCondition == "" {
 		return "", args
+	}
+	if sqlGen.customCondition != "" {
+		args = append(args, sqlGen.customConditionArgs...)
 	}
 	return strings.Replace(sql, "where 1=1 and", "where", 1), args
 }
@@ -188,7 +202,7 @@ func (sqlGen *SQLGen) Insert() (sqlStr string, args []interface{}, err error) {
 		args = append(args, sqlGen.insertColumnMap[key])
 		placeHolders = append(placeHolders, "?")
 	}
-	sqlStr = strutil.Format("insert into %s (%s) values (%s) %s", sqlGen.tableName, strings.Join(columns, ","), strings.Join(placeHolders, ","), sqlGen.customCondition)
+	sqlStr = strutil.Format("insert into %s (%s) values (%s)", sqlGen.tableName, strings.Join(columns, ","), strings.Join(placeHolders, ","))
 	return
 }
 
@@ -201,7 +215,7 @@ func (sqlGen *SQLGen) Delete() (sqlStr string, args []interface{}, err error) {
 	if !sqlGen.forceExecOnNoCondition && conditions == "" {
 		return "", nil, ErrorCheckoutSQLCondition
 	}
-	return strutil.Format("delete from %s %s", sqlGen.tableName, conditions), tArgs, nil
+	return strutil.Format("delete from %s%s%s", sqlGen.tableName, conditions, sqlGen.customCondition), tArgs, nil
 }
 
 /*

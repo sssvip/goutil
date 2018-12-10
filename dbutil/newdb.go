@@ -82,14 +82,16 @@ func (db *DBWrapper) checkSQLStr(sw *stopwatch.StopWatch, sql string) {
 			v, ok := db.statistics.Load(key)
 			if !ok {
 				var stat SQLStatistic
+				stat.MinExecMilliSeconds = execTime
+				stat.MaxExecTimeMilliSeconds = execTime
 				stat.ExecOnce(sql, execTime)
 				db.statistics.Store(key, &stat)
 			} else {
 				v.(*SQLStatistic).ExecOnce(sql, execTime)
 			}
 		}
-		if int(execTime)*1000 > db.slowSQLSeconds {
-			logutil.Warning.Println("found slow sql:", sql)
+		if int(execTime)/1000 > db.slowSQLSeconds {
+			logutil.Warning.Println(strutil.Format("found slow sql exec time [%d ms] sqlStr:%s", execTime, sql))
 		}
 	}
 }

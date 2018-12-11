@@ -25,30 +25,31 @@ type SQLStatisticSummary struct {
 	StatisticEndTime   string
 
 	//SQL执行次数
-	TotalCmdCount int64
+	TotalCmdExecCount int64
+	TotalCmdKindCount int64
 
-	QueryCmdCount          int
+	QueryCmdKindCount      int
 	QueryLongestAveTimeSQL string //执行最长平均时间SQL
 	QueryLongestAveTime    int64  //执行最长平均时间
 	QueryMaxTimesSQL       string //执行次数最多
 	QueryMaxTimesCount     int64
 
 	//Insert
-	InsertCmdCount          int
+	InsertCmdKindCount      int
 	InsertLongestAveTimeSQL string
 	InsertLongestAveTime    int64
 	InsertMaxTimesSQL       string
 	InsertMaxTimesCount     int64
 
 	//Update
-	UpdateCmdCount          int
+	UpdateCmdKindCount      int
 	UpdateLongestAveTimeSQL string
 	UpdateLongestAveTime    int64
 	UpdateMaxTimesSQL       string
 	UpdateMaxTimesCount     int64
 
 	//Delete
-	DeleteCmdCount          int
+	DeleteCmdKindCount      int
 	DeleteLongestAveTimeSQL string
 	DeleteLongestAveTime    int64
 	DeleteMaxTimesSQL       string
@@ -119,9 +120,10 @@ func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
 	summary.StatisticStartTime = db.statisticStartTime
 	stats := db.Statistic()
 	for _, s := range stats {
-		summary.TotalCmdCount += s.ExecCount
+		summary.TotalCmdExecCount += s.ExecCount
+		summary.TotalCmdKindCount++
 		if strings.HasPrefix(s.SQLStr, "select") {
-			summary.QueryCmdCount++
+			summary.QueryCmdKindCount++
 			if s.ExecCount > summary.QueryMaxTimesCount {
 				summary.QueryMaxTimesSQL = s.SQLStr
 				summary.QueryMaxTimesCount = s.ExecCount
@@ -134,7 +136,7 @@ func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
 			continue
 		}
 		if strings.HasPrefix(s.SQLStr, "update") {
-			summary.UpdateCmdCount++
+			summary.UpdateCmdKindCount++
 			if s.ExecCount > summary.UpdateMaxTimesCount {
 				summary.UpdateMaxTimesSQL = s.SQLStr
 				summary.UpdateMaxTimesCount = s.ExecCount
@@ -147,7 +149,7 @@ func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
 			continue
 		}
 		if strings.HasPrefix(s.SQLStr, "insert") {
-			summary.InsertCmdCount++
+			summary.InsertCmdKindCount++
 			if s.ExecCount > summary.InsertMaxTimesCount {
 				summary.InsertMaxTimesSQL = s.SQLStr
 				summary.InsertMaxTimesCount = s.ExecCount
@@ -160,7 +162,7 @@ func (db *DBWrapper) StatisticSummary() (summary SQLStatisticSummary) {
 			continue
 		}
 		if strings.HasPrefix(s.SQLStr, "delete") {
-			summary.DeleteCmdCount++
+			summary.DeleteCmdKindCount++
 			if s.ExecCount > summary.DeleteMaxTimesCount {
 				summary.DeleteMaxTimesSQL = s.SQLStr
 				summary.DeleteMaxTimesCount = s.ExecCount

@@ -203,6 +203,10 @@ func Get(url string) (string, int, http.Header) {
 	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil, false)
 }
 
+func GetWithoutWarning(url string) (string, int, http.Header) {
+	return HttpBaseWithWarning("GET", url, "", false, defaultRetryTimes, nil, nil, false, true)
+}
+
 //不自动跳转
 func SimpleGet(url string) (body string, statusCode int, respHeader http.Header) {
 	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil, true)
@@ -224,10 +228,14 @@ func Post(url string, bodyArgs string, headers map[string]string) (string, int, 
 const ContentType = "Content-Type"
 const UserAgent = "User-Agent"
 
+func HttpBase(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string, noAutoRedirect bool) (string, int, http.Header) {
+	return HttpBaseWithWarning(method, url, body, useProxy, retryTime, expectTexts, headers, noAutoRedirect, false);
+}
+
 //body 可用NewBodyArgs生成
 //expectTexts:满足一个text则正常请求
 //返回respBodyStr,StatusCode,respHeader
-func HttpBase(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string, noAutoRedirect bool) (string, int, http.Header) {
+func HttpBaseWithWarning(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string, noAutoRedirect, printWarning bool) (string, int, http.Header) {
 	reqHelper := ReqHelper{}
 	var request *http.Request
 	var er error
@@ -298,7 +306,7 @@ func HttpBase(method string, url string, body string, useProxy bool, retryTime i
 	statusCode := reqHelper.resp.StatusCode
 	bodyByte, e := ioutil.ReadAll(reqHelper.resp.Body)
 	bodyStr := string(bodyByte)
-	if statusCode != 200 {
+	if printWarning && statusCode != 200 {
 		logutil.Warning.Printf("http status warn:"+strconv.Itoa(reqHelper.resp.StatusCode)+" %s,%s ,data:%s", method, url, bodyStr)
 	}
 	if useProxy {

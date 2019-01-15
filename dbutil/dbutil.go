@@ -61,7 +61,7 @@ func QueryForObject(db *sql.DB, sqlGen *sqlutil.SQLGen, columns ...interface{}) 
 	return
 }
 
-func GetRowsBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]string, err error) {
+func GetRowsBySQLStrBackup(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]string, err error) {
 	rs, e := db.Query(sqlStr, args...)
 	if e != nil {
 		logutil.Error.Println(e, sqlStr, args)
@@ -91,6 +91,48 @@ func GetRowsBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]s
 			return rows, e
 		}
 		rows = append(rows, columns)
+	}
+	return rows, err
+}
+
+func GetRowsBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]string, err error) {
+	rs, e := db.Query(sqlStr, args...)
+	if e != nil {
+		logutil.Error.Println(e, sqlStr, args)
+		return nil, err
+	}
+	defer func() {
+		e := rs.Close()
+		if e != nil {
+			logutil.Error.Println(e)
+		}
+	}()
+	//构造容器
+	cls, er := rs.Columns()
+	if er != nil {
+		logutil.Error.Println(er)
+		return rows, er
+	}
+	buff := make([]interface{}, len(cls))
+	columnBuff := make([]sql.NullString, len(cls))
+	for i, _ := range buff {
+		buff[i] = &columnBuff[i]
+	}
+	for rs.Next() {
+		e := rs.Scan(buff...)
+		if e != nil {
+			logutil.Error.Println(e)
+			return rows, e
+		}
+		var column []string
+		for _, c := range columnBuff {
+			if c.Valid {
+				column = append(column, c.String)
+			} else {
+				column = append(column, "")
+			}
+		}
+		rows = append(rows, column)
 	}
 	return rows, err
 }

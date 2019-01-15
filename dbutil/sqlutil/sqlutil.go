@@ -30,7 +30,7 @@ type SQLGen struct {
 
 func NewSQLGen(tableName string) *SQLGen {
 	sqlGen := SQLGen{
-		tableName:       strutil.Format("`%s`", tableName),
+		tableName:       tableName,
 		insertColumnMap: make(map[string]interface{}),
 		updateColumnMap: make(map[string]interface{}),
 		andConditionMap: make(map[string]interface{}),
@@ -65,17 +65,18 @@ func safeFormatValue(value interface{}) string {
 		return strutil.Format(`'%v'`, value)
 	}
 }
-func safeFormatColumn(column string) string {
+
+/*func safeFormatColumn(column string) string {
 	return column
 	//return strutil.Format("`%s`", column)
-}
+}*/
 
 /*func safeFormatKV(columnName string, value interface{}) string {
 	return strutil.Format(" %s=%s", safeFormatColumn(columnName), safeFormatValue(value))
 }*/
 
 func safeFormatKWithPlaceHolder(columnName string) string {
-	return strutil.Format(" %s=?", safeFormatColumn(columnName))
+	return strutil.Format(" %s=?", columnName)
 }
 
 // condition一旦设置,追加到除了order by,limit关键字外的所有条件最后（需要用到条件时才生效）
@@ -198,7 +199,7 @@ func (sqlGen *SQLGen) Insert() (sqlStr string, args []interface{}, err error) {
 	var columns []string
 	var placeHolders []string
 	for _, key := range sqlGen.insertColumnKeys {
-		columns = append(columns, strutil.Format("%s", safeFormatColumn(key)))
+		columns = append(columns, key)
 		args = append(args, sqlGen.insertColumnMap[key])
 		placeHolders = append(placeHolders, "?")
 	}
@@ -230,12 +231,12 @@ func (sqlGen *SQLGen) getOrderConditions() string {
 }
 
 func (sqlGen *SQLGen) OrderByDesc(column string) *SQLGen {
-	sqlGen.orderByConditions = append(sqlGen.orderByConditions, strutil.Format("%s desc", safeFormatColumn(column)))
+	sqlGen.orderByConditions = append(sqlGen.orderByConditions, strutil.Format("%s desc", column))
 	return sqlGen
 }
 
 func (sqlGen *SQLGen) OrderByAsc(column string) *SQLGen {
-	sqlGen.orderByConditions = append(sqlGen.orderByConditions, strutil.Format("%s asc", safeFormatColumn(column)))
+	sqlGen.orderByConditions = append(sqlGen.orderByConditions, strutil.Format("%s asc", column))
 	return sqlGen
 }
 
@@ -257,7 +258,7 @@ func (sqlGen *SQLGen) QueryColumnsCount() int {
 }
 
 func COALESCE(columnName string, defaultValue interface{}) string {
-	return strutil.Format("COALESCE(%s,%s)", safeFormatColumn(columnName), safeFormatValue(defaultValue))
+	return strutil.Format("COALESCE(%s,%s)", columnName, safeFormatValue(defaultValue))
 }
 
 func (sqlGen *SQLGen) QueryColumns(columns ...string) *SQLGen {
@@ -268,15 +269,15 @@ func (sqlGen *SQLGen) QueryColumns(columns ...string) *SQLGen {
 }
 
 func (sqlGen *SQLGen) getQueryColumns() string {
-	var tColumns []string
+	/*var tColumns []string
 	for _, c := range sqlGen.queryColumns {
 		if strings.HasPrefix(c, "distinct ") || strings.HasPrefix(c, "DISTINCT ") {
 			tColumns = append(tColumns, strutil.Format("DISTINCT COALESCE(%s, '')", safeFormatColumn(c[len("distinct "):])))
 			continue
 		}
 		tColumns = append(tColumns, strutil.Format("COALESCE(%s, '')", safeFormatColumn(c)))
-	}
-	return strings.Join(tColumns, ",")
+	}*/
+	return strings.Join(sqlGen.queryColumns, ",")
 }
 
 func (sqlGen *SQLGen) Query() (sqlStr string, args []interface{}, err error) {

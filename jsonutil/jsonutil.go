@@ -29,6 +29,15 @@ func MarshalToString(a interface{}) string {
 	return b
 }
 
+func MarshalToIndentString(a interface{}) string {
+	b, e := json.MarshalIndent(a, "", "\t")
+	if e != nil {
+		logutil.Error.Println(e)
+		return ""
+	}
+	return string(b)
+}
+
 func UnmarshalFromString(text string, a interface{}) error {
 	e := json.UnmarshalFromString(text, a)
 	if e != nil {

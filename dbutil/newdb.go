@@ -213,9 +213,21 @@ func (db *DBWrapper) checkSQLStr(sw *stopwatch.StopWatch, sql string) {
 	}
 }
 
-func NewDB(username, password, address, port, database string) *DBWrapper {
-	return &DBWrapper{OriginDB: NewDBByArg(username, password, address, port, database),
+func newDefaultDBWrapper() *DBWrapper {
+	return &DBWrapper{
 		slowSQLSeconds: 10, openCheckSlowSQL: false, statisticSQL: false, statistics: sync.Map{}}
+}
+
+func NewDB(username, password, address, port, database string) *DBWrapper {
+	w := newDefaultDBWrapper()
+	w.OriginDB = NewDBByArg(username, password, address, port, database)
+	return w
+}
+
+func NewSqliteDB(fileName, username, password string) *DBWrapper {
+	w := newDefaultDBWrapper()
+	w.OriginDB = NewSQLite3DBByArg(fileName, username, password)
+	return w
 }
 
 func (db *DBWrapper) QueryForObjectBySQLStr(sqlStr string, columnsAddress ...interface{}) error {

@@ -21,7 +21,7 @@ const ProxyError = "ProxyError"
 
 const HttpReqError = "HttpReqError"
 
-var transChan = make(chan *TransWithTime, 1000)
+var transChan = make(chan *TransWithExpireTime, 1000)
 
 var clientChan = make(chan *http.Client, 1000)
 
@@ -39,10 +39,18 @@ func PoolStatistic() string {
 	return fmt.Sprintf("transChan:%d\nclientChan:%d\ntotalClient:%d\n", len(transChan), len(clientChan), totalClient)
 }
 
-type TransWithTime struct {
-	trans *http.Transport
-	time  time.Time
+type TransWithExpireTime struct {
+	trans      *http.Transport
+	expireTime time.Time
 }
+
+func (t TransWithExpireTime) Produce(trans *http.Transport, expireTime time.Time) *TransWithExpireTime {
+	return &TransWithExpireTime{trans: trans, expireTime: expireTime}
+}
+func (t TransWithExpireTime) ProduceBasic(ip, port string, expireTime time.Time) *TransWithExpireTime {
+	return &TransWithExpireTime{trans: ProxyTransport(ip, port), expireTime: expireTime}
+}
+
 type ProxyDTO struct {
 	ERRORCODE string `json:"ERRORCODE"`
 	RESULT    []struct {
@@ -50,22 +58,6 @@ type ProxyDTO struct {
 		Port string `json:"port"`
 	} `json:"RESULT"`
 }
-
-/*
-感觉很不错的参考配置
-t := &http.Transport{
-    Proxy: http.ProxyFromEnvironment,
-    DialContext: (&net.Dialer{
-        Timeout:   30 * time.Second,
-        KeepAlive: 30 * time.Second,
-    }).DialContext,
-    MaxIdleConnsPerHost:   numCoroutines,
-    MaxIdleConns:          100,
-    IdleConnTimeout:       90 * time.Second,
-    TLSHandshakeTimeout:   10 * time.Second,
-    ExpectContinueTimeout: 1 * time.Second,
-}
-*/
 
 var makeProxyRootURL = ""
 
@@ -85,20 +77,11 @@ func ProxyTransport(ip, port string) *http.Transport {
 		}).DialContext,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		/*Dial: func(netw, addr string) (net.Conn, error) {
-			deadline := time.Now().Add(30 * time.Second)
-			c, err := net.DialTimeout(netw, addr, 20*time.Second)
-			if err != nil {
-				return nil, err
-			}
-			c.SetDeadline(deadline)
-			return c, nil
-		},*/
-		Proxy: proxyAddr}
+		Proxy:                 proxyAddr}
 	return transport
 }
 
-func ProduceProxyTrans() {
+func DefaultProduceProxyTrans() {
 	if makeProxyRootURL == "" {
 		logutil.Error.Println("please set makeProxyRootUrl before use proxy")
 		return
@@ -130,45 +113,45 @@ func ProduceProxyTrans() {
 	if proxy.RESULT != nil {
 		for _, data := range proxy.RESULT {
 			transport := ProxyTransport(data.IP, data.Port)
-			transChan <- &TransWithTime{transport, time.Now()}
-			/*err = transQueue.Put()
-			if err != nil {
-				logutil.Error.Println(err)
-				return
-			}*/
-			//log.Println("produce new transport......... success", data.IP, data.Port)
+			transChan <- &TransWithExpireTime{transport, time.Now()}
 		}
 	}
 }
 
+type CustomProxyProduceFunc = func() *TransWithExpireTime
+
+var customProxyFuncs = []CustomProxyProduceFunc{}
+
+func RegisterCustomProxyProduceFunc(f CustomProxyProduceFunc) {
+	customProxyFuncs = append(customProxyFuncs, f)
+}
+
 func getTransFromQueue() *http.Transport {
 	if len(transChan) == 0 {
-		//log.Println("transQueue empty.........")
 		time.Sleep(200 * time.Millisecond)
 		if len(transChan) == 0 {
-			go ProduceProxyTrans()
+			if len(customProxyFuncs) > 0 {
+				go func() {
+					for _, pf := range customProxyFuncs {
+						transChan <- pf()
+					}
+				}()
+			} else {
+				go DefaultProduceProxyTrans()
+			}
 		}
 	}
 	twt := <-transChan
-	//判断有效时间(假定60秒有效)
-	if twt.time.After(time.Now().Add(-60 * time.Second)) {
+	if twt.expireTime.After(time.Now()) {
 		return twt.trans
 	} else {
-		//log.Println("proxy out of data....................")
 		return getTransFromQueue()
 	}
 }
 
 func MakeNewClient() {
 	atomic.AddInt32(&totalClient, 1)
-	/*if totalClient < 500 {
-		atomic.AddInt32(&totalClient, 1)
-	} else {
-		//不再产生新的 等待返回
-		return
-	}*/
 	clt := &http.Client{Transport: getTransFromQueue()}
-	//log.Println("produce a client.......")
 	clientChan <- clt
 }
 
@@ -178,7 +161,6 @@ func Release(clt *http.Client, valid bool, desc string) {
 		logutil.Error.Println("client invalid....descpition:{}", desc)
 		clt.Transport = getTransFromQueue()
 	}
-	//log.Println("Release client success")
 	clientChan <- clt
 }
 
@@ -203,7 +185,7 @@ func Get(url string) (string, int, http.Header) {
 	return HttpBase("GET", url, "", false, defaultRetryTimes, nil, nil, false)
 }
 
-func GetWithoutWarning(url string) (string, int, http.Header) {
+func GetWithWarning(url string) (string, int, http.Header) {
 	return HttpBaseWithWarning("GET", url, "", false, defaultRetryTimes, nil, nil, false, true)
 }
 

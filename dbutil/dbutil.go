@@ -15,6 +15,7 @@ import (
 //ErrorCode 默认的错误值，错误的count数等等
 const ErrorCode = -1
 const ErrorCount = -1
+const NilCount = 0
 
 //NewDBByArg 通过参数获取db对象
 func NewDBByArg(username, password, address, port, database string) *sql.DB {
@@ -285,7 +286,11 @@ func InsertTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, er
 func Exec(db *sql.DB, sql string, args ...interface{}) (result int64, err error) {
 	rst, e := db.Exec(sql, args...)
 	if e == nil {
-		return rst.RowsAffected()
+		if rst != nil {
+			return rst.RowsAffected()
+		} else {
+			return NilCount, e
+		}
 	} else {
 		logutil.Error.Println(e, sql, args)
 	}

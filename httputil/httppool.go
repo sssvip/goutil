@@ -15,6 +15,9 @@ import (
 	"sync/atomic"
 )
 
+var AUTO_TRY = true
+var PRINT_HTTP_NOT_OK_LOG = true
+
 const HttpErrorCode = 500
 
 const ProxyError = "ProxyError"
@@ -271,7 +274,7 @@ func HttpBaseWithWarning(method string, url string, body string, useProxy bool, 
 		if reqHelper.err != nil {
 			logutil.Error.Println(reqHelper.err, body)
 		}
-		if retryTime > 0 {
+		if AUTO_TRY && retryTime > 0 {
 			retryTime--
 			return HttpBase(method, url, body, useProxy, retryTime, expectTexts, headers, noAutoRedirect)
 		} else {
@@ -288,7 +291,7 @@ func HttpBaseWithWarning(method string, url string, body string, useProxy bool, 
 	statusCode := reqHelper.resp.StatusCode
 	bodyByte, e := ioutil.ReadAll(reqHelper.resp.Body)
 	bodyStr := string(bodyByte)
-	if printWarning && statusCode != 200 {
+	if PRINT_HTTP_NOT_OK_LOG && printWarning && statusCode != 200 {
 		logutil.Warning.Printf("http status warn:"+strconv.Itoa(reqHelper.resp.StatusCode)+" %s,%s ,data:%s", method, url, bodyStr)
 	}
 	if useProxy {

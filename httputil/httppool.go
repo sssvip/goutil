@@ -214,7 +214,7 @@ const ContentType = "Content-Type"
 const UserAgent = "User-Agent"
 
 func HttpBase(method string, url string, body string, useProxy bool, retryTime int, expectTexts []string, headers map[string]string, noAutoRedirect bool) (string, int, http.Header) {
-	return HttpBaseWithWarning(method, url, body, useProxy, retryTime, expectTexts, headers, noAutoRedirect, false);
+	return HttpBaseWithWarning(method, url, body, useProxy, retryTime, expectTexts, headers, noAutoRedirect, false)
 }
 
 //body 可用NewBodyArgs生成

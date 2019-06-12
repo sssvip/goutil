@@ -5,8 +5,8 @@ package dbutil
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3"
 	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"

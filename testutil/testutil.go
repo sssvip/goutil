@@ -87,7 +87,7 @@ func TryMoreTime(f func() error, times int, name string, periodPerExecMill ...in
 	tryTimes := 1
 	for {
 		times--
-		if times < 0 {
+		if times <= 0 {
 			break
 		}
 		if err == nil {

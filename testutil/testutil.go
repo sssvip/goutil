@@ -16,6 +16,8 @@ var successChar = clcolor.Green("✔️")
 var failedChar = clcolor.Red("✖️")
 var swAll = stopwatch.NewStopWatch("swAll")
 var stepCount = 0
+var allShowTryTextLen = 0
+var backupTryTimeNum = 0
 
 func init() {
 	if IsWindows() {
@@ -43,13 +45,29 @@ func BackTimes(tryTimes int) {
 	}
 }
 
-var allShowTryTextLen = 0
-
 func ShowTryText(time int) {
 	ClearShowTry()
-	str := strutil.Format(" try %d times ", time)
+	str := strutil.Format("try %d times ", time)
+	backupTryTimeNum = time
 	allShowTryTextLen += utf8.RuneCountInString(str)
 	fmt.Print(clcolor.Yellow(str))
+}
+
+func PrintLine(text string) {
+	Print(text + "\n")
+}
+
+func Print(text string) {
+	ClearShowTry()
+	fmt.Print(text)
+	ReShowTryTimes()
+}
+
+func ReShowTryTimes() {
+	if backupTryTimeNum == 0 {
+		return
+	}
+	ShowTryText(backupTryTimeNum)
 }
 
 func ClearShowTry() {
@@ -64,9 +82,9 @@ func TryMoreTime(f func() error, times int, name string, periodPerExecMill ...in
 	}
 	stepCount++
 	sw := stopwatch.NewStopWatch("t")
+	fmt.Print(strutil.Format("%d.[%s]\n", stepCount, name))
 	err := f()
-	fmt.Print(strutil.Format("%d.[%s]", stepCount, name))
-	tryTimes := 0
+	tryTimes := 1
 	for {
 		times--
 		if times < 0 {
@@ -82,13 +100,14 @@ func TryMoreTime(f func() error, times int, name string, periodPerExecMill ...in
 	}
 	//回退
 	ClearShowTry()
-	timeStr := strutil.Format("\tcurrent step use %dms,total use %ds", sw.ElapsedMilliSeconds(), swAll.ElapsedSeconds())
+	timeStr := strutil.Format("current step use %dms,total use %ds", sw.ElapsedMilliSeconds(), swAll.ElapsedSeconds())
 	if err != nil {
-		fmt.Println(strutil.Format(" %s \nFailed reason:[%s], please check...", failedChar, RedErrorStr(err.Error())))
+		fmt.Println(strutil.Format("current step [%s] test result: %s", name, failedChar))
+		fmt.Println(strutil.Format("Failed reason:[%s], please check...", RedErrorStr(err.Error())))
 		fmt.Println(timeStr)
 		os.Exit(-1)
 	} else {
-		fmt.Println(" " + successChar)
+		fmt.Println(strutil.Format("current step [%s] test result: %s", name, successChar))
 		fmt.Println(timeStr)
 	}
 }

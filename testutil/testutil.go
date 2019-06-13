@@ -100,15 +100,19 @@ func TryMoreTime(f func() error, times int, name string, periodPerExecMill ...in
 	}
 	//回退
 	ClearShowTry()
-	timeStr := strutil.Format("current step use %dms,total use %ds", sw.ElapsedMilliSeconds(), swAll.ElapsedSeconds())
+	timeStr := "time"
+	if tryTimes > 1 {
+		timeStr += "s"
+	}
+	useTimeStr := strutil.Format("current step use %dms(%d %s),total use %ds", sw.ElapsedMilliSeconds(), tryTimes, timeStr, swAll.ElapsedSeconds())
 	if err != nil {
 		fmt.Println(strutil.Format("current step [%s] test result: %s", name, failedChar))
 		fmt.Println(strutil.Format("Failed reason:[%s], please check...", RedErrorStr(err.Error())))
-		fmt.Println(timeStr)
+		fmt.Println(useTimeStr)
 		os.Exit(-1)
 	} else {
 		fmt.Println(strutil.Format("current step [%s] test result: %s", name, successChar))
-		fmt.Println(timeStr)
+		fmt.Println(useTimeStr)
 	}
 }
 

@@ -6,7 +6,7 @@ preview:
 
 maybe click img to show completely.
 
-![test](testutil/test.svg)
+![test](http://sssvip.github.io/goutil/testutil/test.svg)
 
 example:
 

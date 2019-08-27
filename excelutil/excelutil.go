@@ -8,13 +8,13 @@ import (
 )
 
 type ExcelWrapper struct {
-	name        string
-	excel       *excelize.File
-	currentLine int
+	name         string
+	excel        *excelize.File
+	sheetLineMap map[string]int
 }
 
 func NewExcel(fileName string) *ExcelWrapper {
-	return &ExcelWrapper{fileName, excelize.NewFile(), 1}
+	return &ExcelWrapper{fileName, excelize.NewFile(), make(map[string]int)}
 }
 
 func (wrapper *ExcelWrapper) SetTitle() {
@@ -25,11 +25,16 @@ func (wrapper *ExcelWrapper) AppendLine(strs ...string) {
 	wrapper.AppendLineForSheet("sheet1", strs...)
 }
 func (wrapper *ExcelWrapper) AppendLineForSheet(sheet string, strs ...string) {
+	currentLine, ok := wrapper.sheetLineMap[sheet]
+	if !ok {
+		currentLine = 1
+	}
 	for i, s := range strs {
-		cellIndex := string(rune(65+i)) + strconv.Itoa(wrapper.currentLine)
+		cellIndex := string(rune(65+i)) + strconv.Itoa(currentLine)
 		wrapper.excel.SetCellStr(sheet, cellIndex, s)
 	}
-	wrapper.currentLine++
+	currentLine++
+	wrapper.sheetLineMap[sheet] = currentLine
 }
 
 func (wrapper *ExcelWrapper) Save() {

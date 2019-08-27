@@ -20,6 +20,9 @@ func NewExcel(fileName string) *ExcelWrapper {
 func (wrapper *ExcelWrapper) SetTitle() {
 
 }
+func (wrapper *ExcelWrapper) GetExcelOrigin() *excelize.File {
+	return wrapper.excel
+}
 
 func (wrapper *ExcelWrapper) AppendLine(strs ...string) {
 	wrapper.AppendLineForSheet("sheet1", strs...)

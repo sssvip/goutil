@@ -239,7 +239,7 @@ func HttpBaseWithWarning(method string, url string, body string, useProxy bool, 
 		}
 	}
 	if len(body) > 0 && request.Header.Get(ContentType) == "" {
-		if string(body[0]) == "{" {
+		if string(body[0]) == "{" || string(body[0]) == "[" {
 			request.Header.Add(ContentType, "application/json")
 		} else {
 			request.Header.Add(ContentType, "application/x-www-form-urlencoded")

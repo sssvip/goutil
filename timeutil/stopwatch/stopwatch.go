@@ -39,6 +39,15 @@ func NewStopWatch(name ...string) *StopWatch {
 	}
 	return &StopWatch{name: sName, startTime: time.Now()}
 }
+
+func (s *StopWatch) ResetName(name string) {
+	s.name = name
+}
+
+func (s *StopWatch) RestoreStartTime() {
+	s.startTime = time.Now()
+}
+
 func (s *StopWatch) ElapsedMilliSeconds() int64 {
 	return (time.Now().UnixNano() - s.startTime.UnixNano()) / 1000 / 1000
 }

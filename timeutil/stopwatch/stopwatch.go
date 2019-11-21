@@ -40,6 +40,15 @@ func NewStopWatch(name ...string) *StopWatch {
 	return &StopWatch{name: sName, startTime: time.Now()}
 }
 
+func (s *StopWatch) GetName() string {
+	return s.name
+}
+
+func (s *StopWatch) ResetNameAndRestoreStartTime(name string) {
+	s.name = name
+	s.RestoreStartTime()
+}
+
 func (s *StopWatch) ResetName(name string) {
 	s.name = name
 }

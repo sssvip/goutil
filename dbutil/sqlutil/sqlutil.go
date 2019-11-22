@@ -10,6 +10,7 @@ import (
 var ErrorCheckoutSQLCondition = errors.New("checkout conditions,let sql safe,you can sqlGen.ForceExecOnNoCondition() force exec current sql")
 
 type SQLGen struct {
+	printError   bool
 	tableName    string
 	queryColumns []string
 	//辅助有序(输出的sql更加稳定)
@@ -30,6 +31,7 @@ type SQLGen struct {
 
 func NewSQLGen(tableName string) *SQLGen {
 	sqlGen := SQLGen{
+		printError:      true,
 		tableName:       tableName,
 		insertColumnMap: make(map[string]interface{}),
 		updateColumnMap: make(map[string]interface{}),
@@ -38,6 +40,14 @@ func NewSQLGen(tableName string) *SQLGen {
 		limit:           -1,
 	}
 	return &sqlGen
+}
+
+func (sqlGen *SQLGen) PrintError() bool {
+	return sqlGen.printError
+}
+
+func (sqlGen *SQLGen) ClosePrintError() {
+	sqlGen.printError = false
 }
 
 /*

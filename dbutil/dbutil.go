@@ -235,7 +235,7 @@ func DeleteTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 		logutil.Error.Println(e, sqlStr, args)
 		return ErrorCount, e
 	}
-	return Exec(db, sqlStr, args...)
+	return Exec(db, sqlStr, sqlGen.PrintError(), args...)
 }
 
 func DeleteTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -244,7 +244,7 @@ func DeleteTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, er
 		logutil.Error.Println(e, sqlStr, args)
 		return ErrorCount, e
 	}
-	return ExecTx(tx, sqlStr, args...)
+	return ExecTx(tx, sqlStr, sqlGen.PrintError(), args...)
 }
 
 func UpdateTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -253,7 +253,7 @@ func UpdateTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 		logutil.Error.Println(e)
 		return ErrorCount, e
 	}
-	return Exec(db, sqlStr, args...)
+	return Exec(db, sqlStr, sqlGen.PrintError(), args...)
 }
 
 func UpdateTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -262,7 +262,7 @@ func UpdateTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, er
 		logutil.Error.Println(e)
 		return ErrorCount, e
 	}
-	return ExecTx(tx, sqlStr, args...)
+	return ExecTx(tx, sqlStr, sqlGen.PrintError(), args...)
 }
 
 func InsertTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -271,7 +271,7 @@ func InsertTableBySQLGen(db *sql.DB, sqlGen *sqlutil.SQLGen) (result int64, err 
 		logutil.Error.Println(e)
 		return ErrorCount, e
 	}
-	return Exec(db, sqlStr, args...)
+	return Exec(db, sqlStr, sqlGen.PrintError(), args...)
 }
 
 func InsertTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, err error) {
@@ -280,10 +280,10 @@ func InsertTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (result int64, er
 		logutil.Error.Println(e)
 		return ErrorCount, e
 	}
-	return ExecTx(tx, sqlStr, args...)
+	return ExecTx(tx, sqlStr, sqlGen.PrintError(), args...)
 }
 
-func Exec(db *sql.DB, sql string, args ...interface{}) (result int64, err error) {
+func Exec(db *sql.DB, sql string, printError bool, args ...interface{}) (result int64, err error) {
 	rst, e := db.Exec(sql, args...)
 	if e == nil {
 		if rst != nil {
@@ -291,17 +291,19 @@ func Exec(db *sql.DB, sql string, args ...interface{}) (result int64, err error)
 		} else {
 			return NilCount, e
 		}
-	} else {
+	}
+	if printError {
 		logutil.Error.Println(e, sql, args)
 	}
 	return ErrorCode, e
 }
 
-func ExecTx(tx *sql.Tx, sql string, args ...interface{}) (result int64, err error) {
+func ExecTx(tx *sql.Tx, sql string, printError bool, args ...interface{}) (result int64, err error) {
 	rst, e := tx.Exec(sql, args...)
 	if e == nil {
 		return rst.RowsAffected()
-	} else {
+	}
+	if printError {
 		logutil.Error.Println(e, sql, args)
 	}
 	return ErrorCode, e

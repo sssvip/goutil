@@ -29,3 +29,5 @@ replace (
 	github.com/mattn/go-isatty => github.com/sssvip/go-isatty v0.0.4
 	golang.org/x/sys => github.com/gofile/sys v0.0.1
 )
+
+go 1.13

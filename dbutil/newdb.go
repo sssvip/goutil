@@ -359,21 +359,29 @@ func (db *DBWrapper) UpdateTableBySQLGenTx(tx *sql.Tx, sqlGen *sqlutil.SQLGen) (
 }
 
 func (db *DBWrapper) Exec(sqlStr string, args ...interface{}) (result int64, err error) {
+	return db.ExecWithPrintError(sqlStr, true, args...)
+}
+
+func (db *DBWrapper) ExecWithPrintError(sqlStr string, printError bool, args ...interface{}) (result int64, err error) {
 	var t *stopwatch.StopWatch
 	if db.openCheckSlowSQL {
 		t = stopwatch.NewStopWatch(slowSQLCheck)
 	}
-	result, err = Exec(db.OriginDB, sqlStr, args...)
+	result, err = Exec(db.OriginDB, sqlStr, printError, args...)
 	db.checkSQLStr(t, sqlStr)
 	return
 }
 
 func (db *DBWrapper) ExecTx(tx *sql.Tx, sqlStr string, args ...interface{}) (result int64, err error) {
+	return db.ExecTxWithPrintError(tx, sqlStr, true, args...)
+}
+
+func (db *DBWrapper) ExecTxWithPrintError(tx *sql.Tx, sqlStr string, printError bool, args ...interface{}) (result int64, err error) {
 	var t *stopwatch.StopWatch
 	if db.openCheckSlowSQL {
 		t = stopwatch.NewStopWatch(slowSQLCheck)
 	}
-	result, err = ExecTx(tx, sqlStr, args...)
+	result, err = ExecTx(tx, sqlStr, printError, args...)
 	if db.openCheckSlowSQL {
 		db.checkSQLStr(t, sqlStr)
 	}

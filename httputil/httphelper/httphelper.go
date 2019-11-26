@@ -95,6 +95,7 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 		request, er = http.NewRequest(method, urlText, nil)
 	}
 	if er != nil {
+		h.setError(er)
 		return nil
 	}
 	for k, v := range h.AutoTryGuessHeader(body) { //尝试猜测需要加的header
@@ -103,11 +104,10 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 	for k, v := range header {
 		request.Header.Add(k, v)
 	}
-	h.SetError(er)
 	return request
 }
 
-func (h *HttpHelper) SetError(e error) *HttpHelper {
+func (h *HttpHelper) setError(e error) *HttpHelper {
 	h.err = e
 	return h
 }
@@ -116,7 +116,11 @@ func (h *HttpHelper) HasError() bool {
 	return h.err != nil
 }
 
-func (h *HttpHelper) ClearError() *HttpHelper {
+func (h *HttpHelper) GetError() error {
+	return h.err
+}
+
+func (h *HttpHelper) clearError() *HttpHelper {
 	h.err = nil
 	return h
 }

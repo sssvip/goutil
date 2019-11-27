@@ -52,6 +52,11 @@ func (h *HttpHelper) GetClient() *http.Client {
 	return h.clt
 }
 
+func (h *HttpHelper) UseDefaultClient() *HttpHelper {
+	h.clt = http.DefaultClient
+	return h
+}
+
 func (h *HttpHelper) SetNewClientWithTransport(trans *http.Transport) *HttpHelper {
 	h.clt = &http.Client{Transport: trans}
 	return h
@@ -101,7 +106,7 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 	for k, v := range h.AutoTryGuessHeader(body) { //尝试猜测需要加的header
 		request.Header.Add(k, v)
 	}
-	for k, v := range header {
+	for k, v := range header {//如果客户端申明,可以覆盖猜测的
 		request.Header.Add(k, v)
 	}
 	return request

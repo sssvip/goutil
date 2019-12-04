@@ -14,9 +14,8 @@ import (
 const ContentType = "Content-Type"
 const UserAgent = "User-Agent"
 
-type HttpHelper struct {
+type HttpHelper struct {//线程安全
 	clt *http.Client
-	err error
 }
 
 func NewHttpHelper() *HttpHelper {
@@ -62,19 +61,19 @@ func (h *HttpHelper) SetNewClientWithTransport(trans *http.Transport) *HttpHelpe
 	return h
 }
 
-func (h *HttpHelper) Get(urlText string) (resp string, httpCode int, respHeader http.Header) {
+func (h *HttpHelper) Get(urlText string) (resp string, httpCode int, respHeader http.Header, err error) {
 	return h.HttpRequestBase("GET", urlText, "", nil, true)
 }
 
-func (h *HttpHelper) GetWithHeader(urlText string, header map[string]string) (resp string, httpCode int, respHeader http.Header) {
+func (h *HttpHelper) GetWithHeader(urlText string, header map[string]string) (resp string, httpCode int, respHeader http.Header, err error) {
 	return h.HttpRequestBase("GET", urlText, "", header, true)
 }
 
-func (h *HttpHelper) GetNoRedirect(urlText string) (resp string, httpCode int, respHeader http.Header) {
+func (h *HttpHelper) GetNoRedirect(urlText string) (resp string, httpCode int, respHeader http.Header, err error) {
 	return h.HttpRequestBase("GET", urlText, "", nil, false)
 }
 
-func (h *HttpHelper) Post(urlText string, body string, header map[string]string) (resp string, httpCode int, respHeader http.Header) {
+func (h *HttpHelper) Post(urlText string, body string, header map[string]string) (resp string, httpCode int, respHeader http.Header, err error) {
 	return h.HttpRequestBase("POST", urlText, body, header, false)
 }
 
@@ -91,7 +90,7 @@ func (h *HttpHelper) AutoTryGuessHeader(body string) (header map[string]string) 
 	return
 }
 
-func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]string) *http.Request {
+func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]string) (*http.Request, error) {
 	var request *http.Request
 	var er error
 	if len(body) > 0 {
@@ -100,8 +99,7 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 		request, er = http.NewRequest(method, urlText, nil)
 	}
 	if er != nil {
-		h.setError(er)
-		return nil
+		return nil, er
 	}
 	for k, v := range h.AutoTryGuessHeader(body) { //尝试猜测需要加的header
 		request.Header.Add(k, v)
@@ -109,50 +107,29 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 	for k, v := range header { //如果客户端申明,可以覆盖猜测的
 		request.Header.Add(k, v)
 	}
-	return request
+	return request, nil
 }
 
-func (h *HttpHelper) setError(e error) *HttpHelper {
-	h.err = e
-	return h
-}
-
-func (h *HttpHelper) HasError() bool {
-	return h.err != nil
-}
-
-func (h *HttpHelper) GetError() error {
-	return h.err
-}
-
-func (h *HttpHelper) clearError() *HttpHelper {
-	h.err = nil
-	return h
-}
-
-func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[string]string, autoRedirect bool) (respText string, httpCode int, respHeader http.Header) {
-	h.clearError()
-	request := h.NewRequest(method, urlText, body, header)
-	if h.HasError() {
+func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[string]string, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {
+	request, err := h.NewRequest(method, urlText, body, header)
+	if err != nil {
 		return
 	}
 	clt := h.clt
 	var resp *http.Response
 	if !autoRedirect {
-		resp, h.err = clt.Transport.RoundTrip(request)
+		resp, err = clt.Transport.RoundTrip(request)
 	} else {
-		resp, h.err = clt.Do(request)
+		resp, err = clt.Do(request)
 	}
 	defer func() {
 		if resp != nil && resp.Body != nil {
 			_ = resp.Body.Close()
 		}
 	}()
-	if h.HasError() || resp == nil {
+	if resp == nil || err != nil {
 		return
 	}
-	//var bodyByte []byte
-	bodyByte, e := ioutil.ReadAll(resp.Body)
-	h.err = e
-	return string(bodyByte), resp.StatusCode, resp.Header
+	bodyByte, err := ioutil.ReadAll(resp.Body)
+	return string(bodyByte), resp.StatusCode, resp.Header, err
 }

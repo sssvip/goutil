@@ -91,7 +91,7 @@ func (h *HttpHelper) AutoTryGuessHeader(body string) (header map[string]string) 
 	return
 }
 
-func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]string) (*http.Request) {
+func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]string) *http.Request {
 	var request *http.Request
 	var er error
 	if len(body) > 0 {
@@ -106,7 +106,7 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 	for k, v := range h.AutoTryGuessHeader(body) { //尝试猜测需要加的header
 		request.Header.Add(k, v)
 	}
-	for k, v := range header {//如果客户端申明,可以覆盖猜测的
+	for k, v := range header { //如果客户端申明,可以覆盖猜测的
 		request.Header.Add(k, v)
 	}
 	return request
@@ -131,6 +131,7 @@ func (h *HttpHelper) clearError() *HttpHelper {
 }
 
 func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[string]string, autoRedirect bool) (respText string, httpCode int, respHeader http.Header) {
+	h.clearError()
 	request := h.NewRequest(method, urlText, body, header)
 	if h.HasError() {
 		return
@@ -142,13 +143,16 @@ func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[st
 	} else {
 		resp, h.err = clt.Do(request)
 	}
+	defer func() {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
+	}()
 	if h.HasError() || resp == nil {
 		return
 	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-	var bodyByte []byte
-	bodyByte, h.err = ioutil.ReadAll(resp.Body)
+	//var bodyByte []byte
+	bodyByte, e := ioutil.ReadAll(resp.Body)
+	h.err = e
 	return string(bodyByte), resp.StatusCode, resp.Header
 }

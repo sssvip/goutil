@@ -14,7 +14,7 @@ import (
 const ContentType = "Content-Type"
 const UserAgent = "User-Agent"
 
-type HttpHelper struct {//线程安全
+type HttpHelper struct { //线程安全
 	clt *http.Client
 }
 
@@ -74,7 +74,7 @@ func (h *HttpHelper) GetNoRedirect(urlText string) (resp string, httpCode int, r
 }
 
 func (h *HttpHelper) Post(urlText string, body string, header map[string]string) (resp string, httpCode int, respHeader http.Header, err error) {
-	return h.HttpRequestBase("POST", urlText, body, header, false)
+	return h.HttpRequestBase("POST", urlText, body, header, true)
 }
 
 func (h *HttpHelper) AutoTryGuessHeader(body string) (header map[string]string) {
@@ -118,7 +118,11 @@ func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[st
 	clt := h.clt
 	var resp *http.Response
 	if !autoRedirect {
-		resp, err = clt.Transport.RoundTrip(request)
+		trans := clt.Transport
+		if trans == nil {
+			trans = http.DefaultTransport
+		}
+		resp, err = trans.RoundTrip(request)
 	} else {
 		resp, err = clt.Do(request)
 	}

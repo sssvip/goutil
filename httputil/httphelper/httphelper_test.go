@@ -6,6 +6,14 @@ import (
 	"testing"
 )
 
+func TestHttpHelper_Timeout(t *testing.T) {
+	httpHelper := NewHttpHelper()
+	_, _, _, e := httpHelper.Get("http://192.168.2.200:5003/sleep")
+	if e == nil {
+		t.Error("timeout error")
+	}
+}
+
 func TestHttpHelper_Get(t *testing.T) {
 	httpHelper := NewHttpHelper()
 	_, code, _, _ := httpHelper.Get("https://httpbin.org/ip")

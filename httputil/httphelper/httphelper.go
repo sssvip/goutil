@@ -1,6 +1,8 @@
 package httphelper
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -43,7 +45,7 @@ func (h *HttpHelper) NewProxyTransport(ip, port string) *http.Transport {
 }
 
 func (h *HttpHelper) SetNewClient(ip string, port uint) *HttpHelper {
-	h.clt = &http.Client{Transport: h.NewProxyTransport(ip, strconv.Itoa(int(port)))}
+	h.clt = &http.Client{Timeout: 30 * time.Second, Transport: h.NewProxyTransport(ip, strconv.Itoa(int(port)))}
 	return h
 }
 
@@ -53,6 +55,11 @@ func (h *HttpHelper) GetClient() *http.Client {
 
 func (h *HttpHelper) UseDefaultClient() *HttpHelper {
 	h.clt = http.DefaultClient
+	return h
+}
+
+func (h *HttpHelper) SetNewClientWithClient(clt *http.Client) *HttpHelper {
+	h.clt = clt
 	return h
 }
 
@@ -110,9 +117,23 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 	return request, nil
 }
 
+func (h *HttpHelper) Timeout(request *http.Request, duration time.Duration) *http.Request {
+	ctx, _ := context.WithTimeout(context.Background(), duration)
+	return request.WithContext(ctx)
+}
+
 func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[string]string, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {
-	request, err := h.NewRequest(method, urlText, body, header)
+	r, err := h.NewRequest(method, urlText, body, header)
 	if err != nil {
+		return
+	}
+	//default timeout
+	return h.HttpRequest(h.Timeout(r, 10*time.Second), autoRedirect)
+}
+
+func (h *HttpHelper) HttpRequest(request *http.Request, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {
+	if request == nil {
+		err = errors.New("request nil")
 		return
 	}
 	clt := h.clt

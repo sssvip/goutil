@@ -114,7 +114,7 @@ func (h *HttpHelper) NewRequest(method, urlText, body string, header map[string]
 		request.Header.Add(k, v)
 	}
 	for k, v := range header { //如果客户端申明,可以覆盖猜测的
-		request.Header.Add(k, v)
+		request.Header.Set(k, v)
 	}
 	return request, nil
 }

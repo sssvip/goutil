@@ -20,6 +20,8 @@ type HttpHelper struct { //线程安全
 	clt *http.Client
 }
 
+var DefaultHttpHelper = NewHttpHelper()
+
 func NewHttpHelper() *HttpHelper {
 	return &HttpHelper{clt: http.DefaultClient}
 }

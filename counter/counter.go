@@ -39,7 +39,7 @@ func (c *Counter) Inc(key string) {
 	atomic.AddInt32(c.Get(key), 1)
 }
 
-func (c *Counter) Statistic() (result map[string]int32) {
+func (c *Counter) Statistic(calcTotal bool) (result map[string]int32) {
 	result = make(map[string]int32)
 	var total int32 = 0
 	c.statisticMap.Range(func(key, value interface{}) bool {
@@ -48,7 +48,9 @@ func (c *Counter) Statistic() (result map[string]int32) {
 		total = total + v
 		return true
 	})
-	result["total"] = total
+	if calcTotal {
+		result["total"] = total
+	}
 	return
 }
 

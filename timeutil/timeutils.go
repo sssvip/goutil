@@ -1,6 +1,7 @@
 package timeutil
 
 import (
+	"github.com/sssvip/goutil/strutil"
 	"time"
 )
 
@@ -28,4 +29,17 @@ func UTCNow() time.Time {
 
 func Add(t time.Time, seconds int) time.Time {
 	return t.Add(time.Duration(seconds) * time.Second)
+}
+
+func Sleep2NextHour(min, second int) {
+	now := time.Now()
+	// 计算下一个零点
+	nextHour := now.Add(time.Hour)
+	nextHour = time.Date(nextHour.Year(), nextHour.Month(), nextHour.Day(), nextHour.Hour(), min, second, 0, nextHour.Location())
+	sleepSeconds := int(nextHour.Unix() - now.Unix())
+	SleepSeconds(sleepSeconds)
+}
+func UnixNanoStrWithLen(numLen int) string {
+	s := strutil.Format("%v", time.Now().UnixNano())
+	return s[:numLen]
 }

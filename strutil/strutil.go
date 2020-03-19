@@ -1,12 +1,14 @@
 package strutil
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/sssvip/goutil/logutil"
 	"io"
+	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
@@ -83,4 +85,34 @@ func GetStrByRegexp(re *regexp.Regexp, text string, groups ...int) []string {
 		}
 	}
 	return arrRst
+}
+func ArrayRandom(arr []string) (idx int, randStr string) {
+	if len(arr) < 1 {
+		return 0, ""
+	}
+	idx = rand.Intn(len(arr))
+	return idx, arr[idx]
+}
+func ArrayRandomValue(arr []string) string {
+	_, v := ArrayRandom(arr)
+	return v
+}
+func RandNumStr(textLen int) string {
+	var buffer bytes.Buffer
+	for i := 0; i < textLen; i++ {
+		buffer.WriteString(strconv.Itoa(rand.Intn(9) + 1))
+	}
+	return buffer.String()[:textLen]
+}
+
+func RandNumAlphabet(textLen int) string { //32位以内
+	if textLen < 1 {
+		return ""
+	}
+	cnt := textLen/32 + 1
+	var buffer bytes.Buffer
+	for i := 0; i < cnt; i++ {
+		buffer.WriteString(strings.Replace(NewUUID(), "-", "", -1))
+	}
+	return buffer.String()[:textLen]
 }

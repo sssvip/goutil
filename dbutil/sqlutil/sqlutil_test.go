@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var checkData = "insert into tb_test (source,tiny_url,created_on) values (?,?,?),[test test test];update tb_test set  source=?  where tiny_url=? ,[test value test value];select tiny_url,created_on,origin_url,source from tb_test where tiny_url=? and ( created_on=? or source=?) order by created_on asc,tiny_url desc limit 10,[test value or value 2];select count(*) from tb_test  where tiny_url=? ,[test value];delete from tb_test where tiny_url=?,[test value];"
+var checkData = "insert into tb_test (source,tiny_url,created_on) values (?,?,?),[test test test];update tb_test set source=? where tiny_url=?,[test value test value];select tiny_url,created_on,origin_url,source from tb_test where tiny_url=? and ( created_on=? or source=?) order by created_on asc,tiny_url desc limit 10,[test value or value 2];select count(*) from tb_test  where tiny_url=? ,[test value];delete from tb_test where tiny_url=?,[test value];"
 
 func TestExample(t *testing.T) {
 	//fmt.Println(exampleBase(false))
@@ -33,17 +33,18 @@ func TestSQLGen_Update(t *testing.T) {
 }
 
 func TestSQLGen_CustomConditionAndArgsAppend(t *testing.T) {
-	updateStr, args, _ := NewSQLGen("t").UpdateColumn("name", "test").CustomConditionAndArgsAppend("and name=?", "test").Update()
+	updateStr, args, _ := NewSQLGen("t").UpdateColumn("name", "test").And("id", 10).OrderByDesc("name").Limit(10).Update()
 	//测试args
-	for _, arg := range args {
-		assert.Equal(t, "test", arg)
+	mockArgs := []interface{}{"test",10}
+	for i, arg := range args {
+		assert.Equal(t, mockArgs[i], arg)
 	}
 	assert.Equal(t, 2, len(args))
-	assert.Equal(t, "update t set  name=?  where 1=1  and name=?", updateStr)
+	assert.Equal(t, "update t set name=? where id=? order by name desc limit 10", updateStr)
 	queryStr, _, _ := NewSQLGen("t").QueryColumns("name", "test").And("age", 10).CustomConditionAndArgsAppend("and name=?", "test").Query()
 	assert.Equal(t, "select name,test from t where age=? and name=?", queryStr)
-	deleteStr, _, _ := NewSQLGen("t").And("age", 10).CustomConditionAndArgsAppend("and name=?", "test").Delete()
-	assert.Equal(t, "delete from t where age=? and name=?", deleteStr)
+	deleteStr, _, _ := NewSQLGen("t").And("age", 10).And("id>", 10).OrderByAsc("money").Limit(10).Delete()
+	assert.Equal(t, "delete from t where age=? and id>=? order by money asc limit 10", deleteStr)
 	//insertStr, _, _ := NewSQLGen("t").InsertColumn("age", 10).InsertColumn("age2", 10).CustomConditionAndArgsAppend("and name=?", "test").Insert()
 	//fmt.Println(insertStr)
 	//assert.Equal(t, "update `t` set  name=?  where 1=1  and name=?", queryStr)

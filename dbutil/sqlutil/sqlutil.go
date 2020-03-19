@@ -168,7 +168,7 @@ func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 	}
 	conditions, tArgs := sqlGen.genConditions()
 	args = append(args, tArgs...)
-	sqlStr = strutil.Format("update %s set %s %s %s", sqlGen.tableName, strings.Join(updateColumns, ","), conditions, sqlGen.customCondition)
+	sqlStr = strutil.Format("update %s set%s%s%s%s%s", sqlGen.tableName, strings.Join(updateColumns, ","), conditions, sqlGen.getOrderConditions(), sqlGen.limitCondition(), sqlGen.customCondition)
 	if !sqlGen.forceExecOnNoCondition && conditions == "" {
 		logutil.Error.Println("sqlStr:" + sqlStr)
 		return "", nil, ErrorCheckoutSQLCondition
@@ -224,7 +224,7 @@ func (sqlGen *SQLGen) Insert() (sqlStr string, args []interface{}, err error) {
 
 func (sqlGen *SQLGen) Delete() (sqlStr string, args []interface{}, err error) {
 	conditions, tArgs := sqlGen.genConditions()
-	sqlStr = strutil.Format("delete from %s%s%s", sqlGen.tableName, conditions, sqlGen.customCondition)
+	sqlStr = strutil.Format("delete from %s%s%s%s%s", sqlGen.tableName, conditions, sqlGen.getOrderConditions(), sqlGen.limitCondition(), sqlGen.customCondition)
 	if !sqlGen.forceExecOnNoCondition && conditions == "" {
 		logutil.Error.Println("sqlStr:" + sqlStr)
 		return "", nil, ErrorCheckoutSQLCondition

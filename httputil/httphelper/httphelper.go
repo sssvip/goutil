@@ -17,11 +17,12 @@ const ContentType = "Content-Type"
 const UserAgent = "User-Agent"
 
 type HttpHelper struct { //线程安全
-	clt *http.Client
+	defaultTimeout time.Duration
+	clt            *http.Client
 }
 
 func NewHttpHelper() *HttpHelper {
-	return &HttpHelper{clt: http.DefaultClient}
+	return &HttpHelper{clt: http.DefaultClient, defaultTimeout: 30 * time.Second}
 }
 
 func (h *HttpHelper) NewProxyFunc(ip, port string) func(*http.Request) (*url.URL, error) {
@@ -128,7 +129,7 @@ func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[st
 		return
 	}
 	//default timeout
-	return h.HttpRequest(h.Timeout(r, 10*time.Second), autoRedirect)
+	return h.HttpRequest(h.Timeout(r, h.defaultTimeout), autoRedirect)
 }
 
 func (h *HttpHelper) HttpRequest(request *http.Request, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {

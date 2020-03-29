@@ -10,11 +10,14 @@ var json = jsoniter.ConfigCompatibleWithStandardLibrary
 /*func init() {
 	extra.RegisterFuzzyDecoders()
 }*/
+var AutoPrintError = true
 
 func Marshal(a interface{}) []byte {
 	b, e := json.Marshal(a)
 	if e != nil {
-		logutil.Error.Println(e)
+		if AutoPrintError {
+			logutil.Error.Println(e)
+		}
 		return nil
 	}
 	return b
@@ -23,7 +26,9 @@ func Marshal(a interface{}) []byte {
 func MarshalToString(a interface{}) string {
 	b, e := json.MarshalToString(a)
 	if e != nil {
-		logutil.Error.Println(e)
+		if AutoPrintError {
+			logutil.Error.Println(e)
+		}
 		return ""
 	}
 	return b
@@ -36,7 +41,9 @@ func MarshalToIndentString(a interface{}, indent ...string) string {
 	}
 	b, e := json.MarshalIndent(a, "", i)
 	if e != nil {
-		logutil.Error.Println(e)
+		if AutoPrintError {
+			logutil.Error.Println(e)
+		}
 		return ""
 	}
 	return string(b)
@@ -45,7 +52,9 @@ func MarshalToIndentString(a interface{}, indent ...string) string {
 func UnmarshalFromString(text string, a interface{}) error {
 	e := json.UnmarshalFromString(text, a)
 	if e != nil {
-		logutil.Error.Println(text, e)
+		if AutoPrintError {
+			logutil.Error.Println(text, e)
+		}
 	}
 	return e
 }

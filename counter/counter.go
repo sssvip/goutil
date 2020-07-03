@@ -39,6 +39,13 @@ func (c *Counter) Inc(key string) {
 	atomic.AddInt32(c.Get(key), 1)
 }
 
+func (c *Counter) IncValue(key string, value int32) {
+	atomic.AddInt32(c.Get(key), value)
+}
+
+func (c *Counter) OriginData() sync.Map {
+	return c.statisticMap
+}
 func (c *Counter) Statistic(calcTotal bool) (result map[string]int32) {
 	result = make(map[string]int32)
 	var total int32 = 0

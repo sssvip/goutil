@@ -134,7 +134,7 @@ func (h *HttpHelper) HttpRequestBase(method, urlText, body string, header map[st
 	return h.HttpRequest(h.Timeout(r, h.DefaultTimeout), autoRedirect)
 }
 
-func (h *HttpHelper) HttpRequest(request *http.Request, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {
+func (h *HttpHelper) HttpRequestBytes(request *http.Request, autoRedirect bool) (respBytes []byte, httpCode int, respHeader http.Header, err error) {
 	if request == nil {
 		err = errors.New("request nil")
 		return
@@ -159,5 +159,11 @@ func (h *HttpHelper) HttpRequest(request *http.Request, autoRedirect bool) (resp
 		return
 	}
 	bodyByte, err := ioutil.ReadAll(resp.Body)
-	return string(bodyByte), resp.StatusCode, resp.Header, err
+	return bodyByte, resp.StatusCode, resp.Header, err
+}
+
+func (h *HttpHelper) HttpRequest(request *http.Request, autoRedirect bool) (respText string, httpCode int, respHeader http.Header, err error) {
+	r, httpCode, respHeader, err := h.HttpRequestBytes(request, autoRedirect)
+	respText = string(r)
+	return
 }

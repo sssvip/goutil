@@ -5,13 +5,15 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/sssvip/goutil/logutil"
 	"io"
 	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/sssvip/goutil/logutil"
 )
 
 //NewUUID 返回UUID
@@ -115,4 +117,23 @@ func RandNumAlphabet(textLen int) string { //32位以内
 		buffer.WriteString(strings.Replace(NewUUID(), "-", "", -1))
 	}
 	return buffer.String()[:textLen]
+}
+
+func IntWithDefault(text int, defalut string) string {
+	if text == 0 {
+		return defalut
+	}
+	return strconv.Itoa(text)
+}
+
+func StringWithDefault(text, defalut string) string {
+	if text == "" {
+		return defalut
+	}
+	return text
+}
+
+func UnixNanoStrWithLen(numLen int) string {
+	s := Format("%v", time.Now().UnixNano())
+	return s[:numLen]
 }

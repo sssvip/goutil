@@ -5,8 +5,8 @@ package dbutil
 
 import (
 	"database/sql"
+
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
@@ -28,20 +28,6 @@ func NewDBByArg(username, password, address, port, database string) *sql.DB {
 	//db.SetMaxOpenConns(50)
 	//db.SetMaxIdleConns(3)
 	//db.Ping()
-	return db
-}
-
-func NewSQLite3DBByArg(fileName, username, password string) *sql.DB {
-	//
-	dbArg := fileName
-	if username != "" {
-		dbArg += strutil.Format("?_auth&_auth_user=%s&_auth_pass=%s", username, password)
-	}
-	db, err := sql.Open("sqlite3", dbArg)
-	if err != nil {
-		logutil.Error.Println(dbArg, err)
-		return nil
-	}
 	return db
 }
 

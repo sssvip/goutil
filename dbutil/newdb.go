@@ -2,15 +2,16 @@ package dbutil
 
 import (
 	"database/sql"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
 	"github.com/sssvip/goutil/timeutil"
 	"github.com/sssvip/goutil/timeutil/stopwatch"
-	"strings"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 /*
@@ -221,12 +222,6 @@ func newDefaultDBWrapper() *DBWrapper {
 func NewDB(username, password, address, port, database string) *DBWrapper {
 	w := newDefaultDBWrapper()
 	w.OriginDB = NewDBByArg(username, password, address, port, database)
-	return w
-}
-
-func NewSqliteDB(fileName, username, password string) *DBWrapper {
-	w := newDefaultDBWrapper()
-	w.OriginDB = NewSQLite3DBByArg(fileName, username, password)
 	return w
 }
 

@@ -16,5 +16,5 @@ func testStepB() error {
 func TestTryMoreTime(t *testing.T) {
 	//just show test
 	TryMoreTime(testStepA, 1, "testStepA")
-	TryMoreTime(testStepB, 2, "testStepA")
+	//TryMoreTime(testStepB, 2, "testStepB")
 }

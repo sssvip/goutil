@@ -50,6 +50,7 @@ func main() {
 1. sql generator
     
 2. db helper
+with sqlite branch
 
 ### http
 

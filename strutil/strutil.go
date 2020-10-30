@@ -16,6 +16,8 @@ import (
 	"github.com/sssvip/goutil/logutil"
 )
 
+var rd = rand.New(rand.NewSource(time.Now().Unix()))
+
 //NewUUID 返回UUID
 func NewUUID() string {
 	return uuid.New().String()
@@ -92,7 +94,7 @@ func ArrayRandom(arr []string) (idx int, randStr string) {
 	if len(arr) < 1 {
 		return 0, ""
 	}
-	idx = rand.Intn(len(arr))
+	idx = rd.Intn(len(arr))
 	return idx, arr[idx]
 }
 func ArrayRandomValue(arr []string) string {
@@ -102,7 +104,7 @@ func ArrayRandomValue(arr []string) string {
 func RandNumStr(textLen int) string {
 	var buffer bytes.Buffer
 	for i := 0; i < textLen; i++ {
-		buffer.WriteString(strconv.Itoa(rand.Intn(9) + 1))
+		buffer.WriteString(strconv.Itoa(rd.Intn(9) + 1))
 	}
 	return buffer.String()[:textLen]
 }

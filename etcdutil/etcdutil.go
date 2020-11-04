@@ -40,7 +40,7 @@ func (w *ETCDWrapper) Put(key, value string) {
 }
 
 func (w *ETCDWrapper) Get(key string) (value string) {
-	v, e := w.client.Get(context.Background(), w.prefix+key, clientv3.WithFromKey())
+	v, e := w.client.Get(context.Background(), w.prefix+key)
 	if e != nil {
 		logutil.Error.Println(e)
 		return ""

@@ -174,6 +174,6 @@ type CacheUtil interface {
 	Init()
 	Set(key, value string) error
 	Has(key string) bool
-	Get(key string) string
+	Get(key string, defaultValue ...string) string
 	GetDetail(key string) *KeyData
 }

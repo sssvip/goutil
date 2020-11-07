@@ -129,12 +129,18 @@ func (c *CacheDB) Has(key string) bool {
 	return true
 }
 
-func (c *CacheDB) Get(key string) string {
+func (c *CacheDB) Get(key string, defaultValue ...string) string {
 	row, err := c.db.GetRowBySQLGen(sqlutil.NewSQLGen(c.Config.DBTableName).
 		QueryColumns("value").
 		And("key", key))
 	if err != nil {
 		logutil.Error.Println(err)
+	}
+	if len(row) < 1 {
+		if len(defaultValue) > 0 {
+			return defaultValue[0]
+		}
+		return ""
 	}
 	return row[0]
 }

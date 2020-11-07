@@ -111,7 +111,7 @@ func (c *CacheDB) Set(key, value string) (err error) {
 	} else {
 		_, err = c.db.InsertTableBySQLGen(sqlutil.NewSQLGen(c.Config.DBTableName).
 			InsertColumn("value", value).
-			And("key", key))
+			InsertColumn("key", key))
 	}
 	return err
 }

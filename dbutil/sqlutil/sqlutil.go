@@ -2,9 +2,10 @@ package sqlutil
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
-	"strings"
 )
 
 var ErrorCheckoutSQLCondition = errors.New("checkout conditions,let sql safe,you can sqlGen.ForceExecOnNoCondition() force exec current sql")
@@ -25,7 +26,8 @@ type SQLGen struct {
 	customCondition        string
 	customConditionArgs    []interface{}
 	orderByConditions      []string
-	limit                  int
+	limit                  int // 常规简单limit
+	limitEnd               int // limit 跳页 "limit 10,20"中的20
 	forceExecOnNoCondition bool
 }
 
@@ -254,15 +256,23 @@ func (sqlGen *SQLGen) OrderByAsc(column string) *SQLGen {
 }
 
 func (sqlGen *SQLGen) limitCondition() string {
+	if sqlGen.limit > 0 && sqlGen.limitEnd > 0 {
+		return strutil.Format(" limit %d,%d", sqlGen.limit, sqlGen.limitEnd)
+	}
 	if sqlGen.limit > 0 {
 		return strutil.Format(" limit %d", sqlGen.limit)
 	}
 	return ""
 }
 
-//只对query生效
 func (sqlGen *SQLGen) Limit(limit int) *SQLGen {
 	sqlGen.limit = limit
+	return sqlGen
+}
+
+func (sqlGen *SQLGen) LimitPage(limit, limitEnd int) *SQLGen {
+	sqlGen.limit = limit
+	sqlGen.limitEnd = limitEnd
 	return sqlGen
 }
 

@@ -109,6 +109,13 @@ func (sqlGen *SQLGen) CustomConditionAndArgsAppend(condition string, args ...int
 	return sqlGen
 }
 
+func (sqlGen *SQLGen) ForceSetCustomCondition(condition string, args ...interface{}) {
+	sqlGen.customCondition = strutil.Format(" %s", condition)
+	SQLGen.customConditionArgs = []interface{}{} // 重置
+	sqlGen.customConditionArgs = append(sqlGen.customConditionArgs, args...)
+	return sqlGen
+}
+
 func (sqlGen *SQLGen) genConditions() (sqlStr string, args []interface{}) {
 	sqlCondition := " where 1=1"
 	//处理and逻辑

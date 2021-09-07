@@ -109,9 +109,9 @@ func (sqlGen *SQLGen) CustomConditionAndArgsAppend(condition string, args ...int
 	return sqlGen
 }
 
-func (sqlGen *SQLGen) ForceSetCustomCondition(condition string, args ...interface{}) {
+func (sqlGen *SQLGen) ForceSetCustomCondition(condition string, args ...interface{}) *SQLGen {
 	sqlGen.customCondition = strutil.Format(" %s", condition)
-	SQLGen.customConditionArgs = []interface{}{} // 重置
+	sqlGen.customConditionArgs = []interface{}{} // 重置
 	sqlGen.customConditionArgs = append(sqlGen.customConditionArgs, args...)
 	return sqlGen
 }

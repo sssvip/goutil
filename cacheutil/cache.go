@@ -1,11 +1,12 @@
 package cacheutil
 
 import (
+	"os"
+
 	"github.com/sssvip/goutil/dbutil"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
-	"os"
 )
 
 const (
@@ -163,6 +164,10 @@ func (c *CacheDB) GetDetail(key string) *KeyData {
 	return &keyData
 }
 
+func (c *CacheDB) GetOriginDB() *dbutil.DBWrapper {
+	return c.db
+}
+
 type KeyData struct {
 	Key       string
 	Value     string
@@ -176,4 +181,5 @@ type CacheUtil interface {
 	Has(key string) bool
 	Get(key string, defaultValue ...string) string
 	GetDetail(key string) *KeyData
+	GetOriginDB() *dbutil.DBWrapper
 }

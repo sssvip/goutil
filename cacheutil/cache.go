@@ -168,6 +168,10 @@ func (c *CacheDB) GetOriginDB() *dbutil.DBWrapper {
 	return c.db
 }
 
+func (c *CacheDB) GetCacheConfig() CacheConfig {
+	return c.Config
+}
+
 type KeyData struct {
 	Key       string
 	Value     string
@@ -182,4 +186,5 @@ type CacheUtil interface {
 	Get(key string, defaultValue ...string) string
 	GetDetail(key string) *KeyData
 	GetOriginDB() *dbutil.DBWrapper
+	GetCacheConfig() CacheConfig
 }

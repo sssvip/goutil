@@ -224,6 +224,12 @@ func NewDB(username, password, address, port, database string) *DBWrapper {
 	return w
 }
 
+func NewPostgresDB(username, password, address, port, database string) *DBWrapper {
+	w := newDefaultDBWrapper()
+	w.OriginDB = NewPostgresDBByArg(username, password, address, port, database)
+	return w
+}
+
 func NewSqliteDB(fileName, username, password string) *DBWrapper {
 	w := newDefaultDBWrapper()
 	w.OriginDB = NewSQLite3DBByArg(fileName, username, password)

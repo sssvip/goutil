@@ -11,6 +11,7 @@ import (
 var ErrorCheckoutSQLCondition = errors.New("checkout conditions,let sql safe,you can sqlGen.ForceExecOnNoCondition() force exec current sql")
 
 type SQLGen struct {
+	isPostgres   bool
 	printError   bool
 	tableName    string
 	queryColumns []string
@@ -42,6 +43,11 @@ func NewSQLGen(tableName string) *SQLGen {
 		limit:           -1,
 	}
 	return &sqlGen
+}
+
+func (sqlGen *SQLGen) SetPostgres(value bool) *SQLGen{
+	sqlGen.isPostgres = value
+	return sqlGen
 }
 
 func (sqlGen *SQLGen) PrintError() bool {
@@ -87,7 +93,14 @@ func safeFormatValue(value interface{}) string {
 	return strutil.Format(" %s=%s", safeFormatColumn(columnName), safeFormatValue(value))
 }*/
 
-func safeFormatKWithPlaceHolder(columnName string) string {
+func (sqlGen *SQLGen) safeFormatKWithPlaceHolder(columnName string, index ...int) string {
+	if sqlGen.isPostgres {
+		idx := 1
+		if len(index) > 0 {
+			idx = index[0]
+		}
+		return strutil.Format(" %s=$%v", columnName, idx)
+	}
 	return strutil.Format(" %s=?", columnName)
 }
 
@@ -120,8 +133,10 @@ func (sqlGen *SQLGen) genConditions() (sqlStr string, args []interface{}) {
 	sqlCondition := " where 1=1"
 	//处理and逻辑
 	var andConditions []string
+	var idx int = 0
 	for _, key := range sqlGen.andConditionKeys {
-		andConditions = append(andConditions, safeFormatKWithPlaceHolder(key))
+		idx++
+		andConditions = append(andConditions, sqlGen.safeFormatKWithPlaceHolder(key, idx))
 		args = append(args, sqlGen.andConditionMap[key])
 	}
 	var andCondition string
@@ -131,7 +146,8 @@ func (sqlGen *SQLGen) genConditions() (sqlStr string, args []interface{}) {
 	//处理or逻辑
 	var orConditions []string
 	for _, key := range sqlGen.orConditionKeys {
-		orConditions = append(orConditions, safeFormatKWithPlaceHolder(key))
+		idx++
+		orConditions = append(orConditions, sqlGen.safeFormatKWithPlaceHolder(key, idx))
 		args = append(args, sqlGen.orConditionMap[key])
 	}
 	var orCondition string
@@ -171,8 +187,8 @@ func (sqlGen *SQLGen) ForceExecOnNoCondition() *SQLGen {
 
 func (sqlGen *SQLGen) Update() (sqlStr string, args []interface{}, err error) {
 	var updateColumns []string
-	for _, key := range sqlGen.updateColumnKeys {
-		updateColumns = append(updateColumns, strutil.Format("%s", safeFormatKWithPlaceHolder(key)))
+	for i, key := range sqlGen.updateColumnKeys {
+		updateColumns = append(updateColumns, strutil.Format("%s", sqlGen.safeFormatKWithPlaceHolder(key,i+1)))
 		args = append(args, sqlGen.updateColumnMap[key])
 	}
 	conditions, tArgs := sqlGen.genConditions()

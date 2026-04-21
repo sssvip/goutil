@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
+	_ "github.com/lib/pq"
 	"github.com/sssvip/goutil/dbutil/sqlutil"
 	"github.com/sssvip/goutil/logutil"
 	"github.com/sssvip/goutil/strutil"
@@ -31,8 +32,19 @@ func NewDBByArg(username, password, address, port, database string) *sql.DB {
 	return db
 }
 
+//NewPostgresDBByArg 通过参数获取db对象
+func NewPostgresDBByArg(username, password, address, port, database string) *sql.DB {
+	// postgres://myuser:mypass@localhost:5432/mydb?sslmode=disable&client_encoding=utf8
+	url := strutil.Format("postgres://%s:%s@%s:%s/%s?sslmode=disable&client_encoding=utf8", username, password, address, port, database)
+	db, err := sql.Open("postgres", url)
+	if err != nil {
+		logutil.Error.Println(url, err)
+		return nil
+	}
+	return db
+}
+
 func NewSQLite3DBByArg(fileName, username, password string) *sql.DB {
-	//
 	dbArg := fileName
 	if username != "" {
 		dbArg += strutil.Format("?_auth&_auth_user=%s&_auth_pass=%s", username, password)

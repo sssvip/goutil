@@ -92,7 +92,7 @@ func GetRowsBySQLStrBackup(db *sql.DB, sqlStr string, args ...interface{}) (rows
 	rs, e := db.Query(sqlStr, args...)
 	if e != nil {
 		logutil.Error.Println(e, sqlStr, args)
-		return nil, err
+		return nil, e
 	}
 	defer func() {
 		e := rs.Close()
@@ -126,7 +126,7 @@ func GetRowsBySQLStr(db *sql.DB, sqlStr string, args ...interface{}) (rows [][]s
 	rs, e := db.Query(sqlStr, args...)
 	if e != nil {
 		logutil.Error.Println(e, sqlStr, args)
-		return nil, err
+		return nil, e
 	}
 	defer func() {
 		e := rs.Close()
@@ -168,7 +168,7 @@ func GetRowsBySQLStrTx(tx *sql.Tx, sqlStr string, args ...interface{}) (rows [][
 	rs, e := tx.Query(sqlStr, args...)
 	if e != nil {
 		logutil.Error.Println(e, sqlStr, args)
-		return nil, err
+		return nil, e
 	}
 	defer func() {
 		e := rs.Close()
@@ -313,7 +313,11 @@ func Exec(db *sql.DB, sql string, printError bool, args ...interface{}) (result 
 func ExecTx(tx *sql.Tx, sql string, printError bool, args ...interface{}) (result int64, err error) {
 	rst, e := tx.Exec(sql, args...)
 	if e == nil {
-		return rst.RowsAffected()
+		if rst != nil {
+			return rst.RowsAffected()
+		} else {
+			return NilCount, e
+		}
 	}
 	if printError {
 		logutil.Error.Println(e, sql, args)
